@@ -1,0 +1,8 @@
+node_modules/
+# Built frontend (embedded into the Go binary); keep only the placeholder.
+backend/internal/web/dist/*
+!backend/internal/web/dist/.gitkeep
+*.exe
+.env
+/config/config.yaml
+/bin/

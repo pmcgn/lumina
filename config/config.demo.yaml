@@ -1,0 +1,126 @@
+# Lumina demo: every integration, one widget type each.
+# Page 1 is the home screen (clock, weather, calendar, tasks, openHAB); page 2 shows
+# the Grafana widget as chart, gauge and stat.
+#
+# Needs no secrets and touches none of your real systems: openHAB, Vikunja, Grafana
+# and the calendars come from the stand-ins of `demo-services` (see README, "Demo").
+# Only the weather is live (Open-Meteo, public, no key).
+#
+# Start everything with:   scripts/demo.ps1
+#
+# To use your real systems, change the `connections` below: point `openhab`,
+# `vikunja` and `grafana` at your servers (Vikunja needs an API token, Grafana a
+# service account token with the Viewer role), and replace the calendar URLs with
+# your iCal addresses (for Google: "Secret address in iCal format"). Keep secrets
+# out of this file, e.g. token: ${VIKUNJA_TOKEN}.
+
+locale: de
+timezone: Europe/Berlin
+
+grid:
+  columns: 8
+  rows: 4
+
+# A permanently running screen could also use (see config.example.yaml):
+# display:
+#   night: { from: "23:00", to: "06:00", mode: dim }
+#   rotate: { enabled: true }       # only useful with several pages
+
+connections:
+  # --- stand-ins from demo-services ---------------------------------------
+  openhab:
+    url: http://localhost:18080
+  vikunja:
+    url: http://localhost:18080
+    token: demo
+  grafana:
+    url: http://localhost:18080
+    token: demo
+  family-calendar:
+    url: http://localhost:18080/calendar/family.ics
+  work-calendar:
+    url: http://localhost:18080/calendar/work.ics
+  # Google's public holiday calendar (real data, no secret needed)
+  holidays:
+    url: https://calendar.google.com/calendar/ical/de.german%23holiday%40group.v.calendar.google.com/public/basic.ics
+
+pages:
+  - id: home
+    title: Zuhause
+    widgets:
+      # Core
+      - id: clock
+        type: core.clock
+        pos: { x: 0, y: 0, w: 2, h: 1 }
+
+      # Open-Meteo: current conditions, 24 h temperature curve with rain probability, 7 days
+      - id: weather
+        type: weather.forecast
+        pos: { x: 0, y: 1, w: 2, h: 3 }
+        alwaysOn: true
+        settings:
+          location: Köln
+
+      # iCal feeds merged into one upcoming view
+      - id: calendar
+        type: calendar.agenda
+        pos: { x: 2, y: 0, w: 3, h: 4 }
+        alwaysOn: true
+        settings:
+          title: Als Nächstes
+          days: 14
+          calendars:
+            - { connection: family-calendar, name: Familie, color: "#f59e0b" }
+            - { connection: work-calendar, name: Arbeit, color: "#3b82f6" }
+            - { connection: holidays, name: Feiertage, color: "#10b981" }
+
+      # Open tasks: overdue first; tap the circle to complete (with undo), or add a task
+      - id: tasks
+        type: vikunja.tasks
+        connection: vikunja
+        pos: { x: 5, y: 0, w: 3, h: 2 }
+        alwaysOn: true
+        settings:
+          title: Aufgaben
+          addProject: Inbox
+
+      # openHAB sitemap: lights, dimmer, blinds, heating mode and values; live via the event stream
+      - id: house
+        type: openhab.sitemap
+        connection: openhab
+        pos: { x: 5, y: 2, w: 3, h: 2 }
+        settings:
+          sitemap: Demo
+          title: Haus
+
+  # Grafana: panels of an existing dashboard, re-run through Grafana's query API (any datasource),
+  # drawn natively with the panel's unit, thresholds and time range.
+  - id: analysis
+    title: Auswertung
+    widgets:
+      # a time series panel: one line per series, touch the chart for the values
+      - id: power
+        type: grafana.panel
+        connection: grafana
+        pos: { x: 0, y: 0, w: 5, h: 4 }
+        alwaysOn: true
+        settings:
+          dashboard: demo-haus      # uid or title
+          panel: Stromverbrauch und Erzeugung   # id or title
+          # range: 6h               # default: the dashboard's range (here 24h)
+
+      # a gauge panel: latest value on a dial, colored by the panel's thresholds
+      - id: battery
+        type: grafana.panel
+        connection: grafana
+        pos: { x: 5, y: 0, w: 3, h: 2 }
+        alwaysOn: true
+        settings: { dashboard: demo-haus, panel: Batterie }
+
+      # a stat panel: big number with a sparkline
+      - id: outdoor
+        type: grafana.panel
+        connection: grafana
+        pos: { x: 5, y: 2, w: 3, h: 2 }
+        alwaysOn: true
+        settings: { dashboard: demo-haus, panel: 3 }

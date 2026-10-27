@@ -1,0 +1,97 @@
+# Example manifests. Adjust namespace, image, hostname and ingress class.
+# Secrets are referenced from the config as ${VAR}; provide them via the Secret below.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lumina-config
+data:
+  config.yaml: |
+    locale: de
+    timezone: Europe/Berlin
+    theme: { mode: auto }
+    grid: { columns: 6, rows: 4 }
+    pages:
+      - id: home
+        title: Home
+        widgets:
+          - { id: clock, type: core.clock, pos: { x: 0, y: 0, w: 2, h: 1 } }
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lumina-secrets
+type: Opaque
+stringData: {}
+  # VIKUNJA_TOKEN: "..."
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumina
+spec:
+  replicas: 1 # keep at 1: state (cache, history) lives in memory
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: lumina }
+  template:
+    metadata:
+      labels: { app: lumina }
+    spec:
+      terminationGracePeriodSeconds: 15
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: lumina
+          image: ghcr.io/example/lumina:latest
+          args: ["-config", "/config/config.yaml"]
+          ports:
+            - { name: http, containerPort: 8080 }
+          envFrom:
+            - secretRef: { name: lumina-secrets }
+          volumeMounts:
+            - { name: config, mountPath: /config, readOnly: true }
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+      volumes:
+        - name: config
+          configMap: { name: lumina-config }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lumina
+spec:
+  selector: { app: lumina }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lumina
+  annotations:
+    # WebSockets are long-lived; ingress-nginx closes idle ones after 60 s by default.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: lumina.home.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: lumina, port: { name: http } }

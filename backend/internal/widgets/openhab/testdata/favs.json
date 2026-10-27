@@ -1,0 +1,179 @@
+{
+ "id": "Favs",
+ "title": "openHAB",
+ "leaf": false,
+ "timeout": false,
+ "widgets": [
+  {
+   "widgetId": "1_0",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "item": {
+    "state": "OFF",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "ON",
+    "lastStateUpdate": 1792268911556,
+    "lastStateChange": 1792263089896,
+    "type": "Switch",
+    "name": "SleepingRoomLight",
+    "label": "Licht Schlafzimmer",
+    "category": "switch",
+    "tags": [
+     "Control"
+    ],
+    "groupNames": [
+     "gShellySleepingRoomLight",
+     "gAllSwitchedLights"
+    ]
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Switch",
+   "label": "Licht SZ [OFF]",
+   "icon": "switch",
+   "staticIcon": false
+  },
+  {
+   "widgetId": "1_1",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "state": "OFF",
+   "item": {
+    "state": "0,0,0",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "30,60,100",
+    "lastStateUpdate": 1792263689900,
+    "lastStateChange": 1792263689900,
+    "type": "Color",
+    "name": "SleepingRoomAmbientLightBed",
+    "label": "Schlafzimmer Lichtfarbe",
+    "category": "colorwheel",
+    "tags": [],
+    "groupNames": []
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Switch",
+   "label": "Amb. SZ [0,0,0]",
+   "icon": "colorwheel",
+   "staticIcon": false
+  },
+  {
+   "widgetId": "1_2",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "item": {
+    "state": "ON",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "OFF",
+    "lastStateUpdate": 1792268626878,
+    "lastStateChange": 1792262731529,
+    "type": "Switch",
+    "name": "AmbientLiving1",
+    "label": "Ambient Beleuchtung 1",
+    "tags": [],
+    "groupNames": [
+     "gAllSwitchedLights"
+    ]
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Switch",
+   "label": "Amb. 1 WZ [ON]",
+   "icon": "switch",
+   "staticIcon": false
+  },
+  {
+   "widgetId": "1_3",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "item": {
+    "state": "OFF",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "ON",
+    "lastStateUpdate": 1792268635178,
+    "lastStateChange": 1792265584691,
+    "type": "Switch",
+    "name": "AmbientLiving2",
+    "label": "Ambient Beleuchtung 2",
+    "tags": [],
+    "groupNames": [
+     "gAllSwitchedLights"
+    ]
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Switch",
+   "label": "Amb. 2 WZ [OFF]",
+   "icon": "switch",
+   "staticIcon": false
+  },
+  {
+   "widgetId": "1_4",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "unit": "",
+   "widgets": [
+    {
+     "widgetId": "1_40",
+     "visibility": true,
+     "labelSource": "SITEMAP_WIDGET",
+     "pattern": "%.1f W",
+     "unit": "",
+     "item": {
+      "state": "0.0",
+      "stateDescription": {
+       "pattern": "%.0f",
+       "readOnly": false,
+       "options": []
+      },
+      "lastState": "1.3139093",
+      "lastStateUpdate": 1792268918081,
+      "lastStateChange": 1792257161246,
+      "type": "Number",
+      "name": "PV_TotalGeneration",
+      "label": "PV DC Leistung Aktuell",
+      "category": "energy",
+      "tags": [],
+      "groupNames": []
+     },
+     "widgets": [],
+     "mappings": [],
+     "type": "Text",
+     "label": "PV Erz. [0.0 W]",
+     "icon": "solarplant",
+     "staticIcon": false
+    }
+   ],
+   "mappings": [],
+   "type": "Frame",
+   "label": "Stats",
+   "icon": "frame",
+   "staticIcon": false
+  }
+ ]
+}

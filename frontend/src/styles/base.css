@@ -1,0 +1,73 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-m);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation; /* no double-tap zoom */
+}
+
+/* Scrollbars: thin, rounded, in the theme's colors. Chrome/WebView use the
+   ::-webkit-scrollbar parts; the standard properties are only for browsers
+   without them (Firefox), because Chrome 121+ would otherwise ignore the parts. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar);
+  background-clip: content-box; /* the transparent border leaves a gap to the card edge */
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-hover);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+  }
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* Lite mode (display.lite): nothing animates. */
+:root[data-lite] *,
+:root[data-lite] *::before,
+:root[data-lite] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0ms;
+  }
+}

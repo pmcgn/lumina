@@ -1,0 +1,54 @@
+# Generates the TypeScript types of the data the backend sends to the browser.
+# Run from backend/:   go tool tygo generate
+# The output (*.gen.ts) is committed; a Go test fails when it is out of date.
+#
+# Only the wire model of each package is converted (model.go), never provider
+# internals. Add a widget: add a package block here and keep its data types in model.go.
+
+# json.RawMessage is arbitrary JSON (widget data, action parameters).
+type_mappings:
+  json.RawMessage: "any"
+  widget.StringList: "string[]"   # a setting that is a list of text values (may also be written as one value)
+  widget.FlexString: "string | number"   # a setting that is text but may be written as a number
+
+packages:
+  - path: "github.com/pmcgn/lumina/internal/widgets/clock"
+    output_path: "../frontend/src/widgets/clock/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/widgets/weather"
+    output_path: "../frontend/src/widgets/weather/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/widgets/vikunja"
+    output_path: "../frontend/src/widgets/vikunja/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/widgets/openhab"
+    output_path: "../frontend/src/widgets/openhab/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/widgets/calendar"
+    output_path: "../frontend/src/widgets/calendar/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/widgets/grafana"
+    output_path: "../frontend/src/widgets/grafana/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
+  # Shared protocol (WebSocket envelope, widget state) and the config the browser receives
+  - path: "github.com/pmcgn/lumina/internal/core"
+    output_path: "../frontend/src/lib/protocol.gen.ts"
+    include_files: ["protocol.go"]
+    enum_style: union
+
+  - path: "github.com/pmcgn/lumina/internal/config"
+    output_path: "../frontend/src/lib/config.gen.ts"
+    include_files: ["client.go"]
+    enum_style: union

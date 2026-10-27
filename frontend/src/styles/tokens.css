@@ -1,0 +1,98 @@
+/* Design tokens. Everything visual in widgets derives from these variables. */
+:root {
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --radius: 18px;
+  --radius-s: 10px;
+
+  --text-s: 0.8125rem;
+  --text-m: 1rem;
+  --text-l: 1.375rem;
+  --text-xl: 3.25rem;
+
+  --motion: 200ms;
+
+  /* light theme (default) */
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #f3f5f9;
+  --border: rgba(20, 30, 50, 0.08);
+  --text: #141a26;
+  --muted: #6a7488;
+  --accent: #3b82f6;
+  --accent-2: #38bdf8;
+  --ok: #22a06b;
+  --warn: #e0a100;
+  --danger: #e5484d;
+  /* translucent tints for backgrounds (no color-mix: not available before Chrome 111) */
+  --danger-soft: rgba(229, 72, 77, 0.16);
+  --warn-soft: rgba(224, 161, 0, 0.2);
+  --ok-soft: rgba(34, 160, 107, 0.16);
+  --accent-soft: rgba(59, 130, 246, 0.16);
+  --accent-soft-strong: rgba(59, 130, 246, 0.28);
+  --shadow: 0 1px 2px rgba(20, 30, 50, 0.06), 0 4px 14px rgba(20, 30, 50, 0.06);
+
+  /* weather icon palette */
+  --icon-sun: #f5a623;
+  --icon-moon: #8c9bbd;
+  --icon-cloud: #b4c0d4;
+  --icon-cloud-back: #d2dae8;
+  --icon-cloud-dark: #8794ab;
+  --icon-rain: #3b9cf5;
+  --icon-snow: #7fb4e8;
+
+  /* scrollbars */
+  --scrollbar: rgba(20, 30, 50, 0.22);
+  --scrollbar-hover: rgba(20, 30, 50, 0.42);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0d0f14;
+    --surface: #171a22;
+    --surface-2: #1e222c;
+    --border: rgba(255, 255, 255, 0.07);
+    --text: #eef1f7;
+    --muted: #8a93a6;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --icon-sun: #ffc247;
+    --icon-moon: #c9d4ef;
+    --icon-cloud: #c5cfe2;
+    --icon-cloud-back: #727d93;
+    --icon-cloud-dark: #96a2ba;
+    --icon-rain: #5db3ff;
+    --icon-snow: #cfe6ff;
+    --scrollbar: rgba(255, 255, 255, 0.2);
+    --scrollbar-hover: rgba(255, 255, 255, 0.4);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0d0f14;
+  --surface: #171a22;
+  --surface-2: #1e222c;
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #eef1f7;
+  --muted: #8a93a6;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --icon-sun: #ffc247;
+  --icon-moon: #c9d4ef;
+  --icon-cloud: #c5cfe2;
+  --icon-cloud-back: #727d93;
+  --icon-cloud-dark: #96a2ba;
+  --icon-rain: #5db3ff;
+  --icon-snow: #cfe6ff;
+  --scrollbar: rgba(255, 255, 255, 0.2);
+  --scrollbar-hover: rgba(255, 255, 255, 0.4);
+}
+
+/* Lite mode: no transitions, flat look (for weak devices). */
+:root[data-lite] {
+  --motion: 0ms;
+  --shadow: none;
+}

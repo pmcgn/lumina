@@ -1,0 +1,30 @@
+{
+  "name": "lumina-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/d3-array": "^3.2.2",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-shape": "^3.2.0",
+    "@types/node": "^26.6.5",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "typescript": "~5.9",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "d3-array": "^3.2.4",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0"
+  }
+}

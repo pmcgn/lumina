@@ -1,0 +1,145 @@
+# Lumina example configuration.
+# Environment variable references (dollar sign + curly braces around a name) are replaced before parsing,
+# so secrets can stay out of this file. Full-line comments are not expanded.
+
+locale: de            # de | en
+timezone: Europe/Berlin   # used for "today"/"overdue" windows (default: server timezone)
+theme:
+  mode: auto          # auto | light | dark
+  # accent: "#4f9cff"
+
+grid:
+  columns: 6
+  rows: 4
+
+# How the dashboard behaves on a screen that is always on (all optional):
+# display:
+#   rotate:                       # cycle through the pages automatically
+#     enabled: true
+#     intervalSeconds: 30         # time per page
+#     pauseSeconds: 60            # a touch pauses the rotation for this long
+#   night:                        # evening/night mode (software only, the tablet's own
+#     from: "23:00"               # screen and brightness are not controlled); times are
+#     to: "06:00"                 # the tablet's local time and may span midnight
+#     mode: dim                   # dim: darkens the dashboard (dim: 0.75 = how dark)
+#     dim: 0.75                   # clock: shows only a clock, a touch wakes the dashboard
+#     wakeSeconds: 30             #        for wakeSeconds
+#   softReload: "03:30"           # daily page reload as a safety net for 24/7 operation
+#                                 # (default 03:30, "" turns it off)
+#   lite: false                   # no animations or shadows, for weak devices
+
+server:
+  # Extra WebSocket origins; only needed for the Vite dev server:
+  # allowedOrigins: ["localhost:5173"]
+
+connections: {}
+  # Connections hold URLs and secrets and never reach the browser. Example:
+  #
+  # connections:
+  #   vikunja:
+  #     url: https://tasks.example.lan
+  #     token: ${VIKUNJA_TOKEN}      # API token (Vikunja: Settings > API Tokens), provided as env var
+  #   family-calendar:               # one connection per calendar; the iCal address is a secret
+  #     url: https://calendar.google.com/calendar/ical/XXXX/private-YYYY/basic.ics
+  #                                  # Google: calendar settings > "Secret address in iCal format".
+  #                                  # Treat it like a password. "file: /path/cal.ics" works too.
+  #   holidays:
+  #     url: https://calendar.google.com/calendar/ical/de.german%23holiday%40group.v.calendar.google.com/public/basic.ics
+  #   grafana:
+  #     url: https://grafana.example.lan
+  #     token: ${GRAFANA_TOKEN}      # service account token, role Viewer (read-only)
+  #   openhab:
+  #     url: http://openhab.local:8080
+  #     # token: ${OPENHAB_TOKEN}    # only if your openHAB requires an API token
+
+pages:
+  - id: home
+    title: Home
+    widgets:
+      - id: clock-main
+        type: core.clock
+        pos: { x: 0, y: 0, w: 2, h: 1 }
+        settings:
+          showSeconds: false
+      - id: weather
+        type: weather.forecast
+        pos: { x: 0, y: 1, w: 4, h: 3 }
+        settings:
+          location: Köln        # or: latitude: 50.94 / longitude: 6.96
+          # label: Zuhause      # display name, defaults to the geocoded name
+      - id: clock-utc
+        type: core.clock
+        pos: { x: 2, y: 0, w: 2, h: 1 }
+        settings:
+          timezone: UTC
+          label: UTC
+
+      # Vikunja task list (needs the connection above). Shows the open tasks, overdue first;
+      # tap the circle to complete (with undo). Settings (all optional):
+      #   projects: [Smarthome]    names or ids; a single project also enables "add task"
+      #   labels: [home]           task must carry all of these labels
+      #   due: all                 all | overdue | today | week (today/week include overdue)
+      #   filter: "priority >= 3"  extra Vikunja filter expression
+      #   limit: 50                max rows; "intervalSeconds: 60" poll interval
+      #   addProject: Inbox        target for "add task" if not exactly one project is set
+      #   title / showProject      heading; project name per row (default: if several projects)
+      # - id: tasks
+      #   type: vikunja.tasks
+      #   connection: vikunja
+      #   readOnly: false          true hides the checkboxes and the add button
+      #   pos: { x: 4, y: 0, w: 2, h: 4 }
+      #   settings: { projects: [Smarthome], due: all }
+
+      # openHAB: shows a sitemap natively (lights as tiles, mappings as buttons, values as
+      # tiles, frames as headings, sliders for dimmers/blinds/setpoints) and updates live
+      # from openHAB's event stream. Edit the dashboard by editing the sitemap. Switches,
+      # mapping buttons and sliders can be operated; color pickers and selections are shown
+      # read-only for now.
+      #   sitemap: Favs      name of the openHAB sitemap (required)
+      #   page: Favs         sub-page, defaults to the sitemap name
+      #   title: Favoriten   defaults to the page title
+      # - id: house
+      #   type: openhab.sitemap
+      #   connection: openhab
+      #   readOnly: false    true: show states, no switching
+      #   pos: { x: 0, y: 1, w: 4, h: 3 }
+      #   settings: { sitemap: Favs }
+
+      # Calendar: merges iCal feeds (Google secret address, Nextcloud, any .ics), expands
+      # recurring events, handles time zones and all-day events. Read-only. Agenda list
+      # grouped by day (running event highlighted); with enough room also a month overview
+      # with colored dots.
+      #   calendars: ...         list of connection names, or { connection, name, color }
+      #   days: 14               how far the agenda looks ahead (1-60)
+      #   limit: 40              max agenda entries
+      #   intervalMinutes: 10    refresh interval (feeds are fetched with conditional requests)
+      #   weekStart: monday      monday | sunday
+      #   showPast: false        keep today's finished events
+      #   showMonth: true        default: automatic by card size
+      # - id: calendar
+      #   type: calendar.agenda
+      #   pos: { x: 0, y: 0, w: 4, h: 4 }
+      #   settings:
+      #     title: Termine
+      #     calendars:
+      #       - { connection: family-calendar, name: Familie, color: "#f59e0b" }
+      #       - holidays
+
+      # Grafana: draws a panel of an existing dashboard natively as chart, stat or gauge. The
+      # widget re-runs the panel's queries through Grafana's query API, so every datasource
+      # Grafana supports works, and it takes unit, thresholds, min/max and time range from the
+      # panel (edit the panel in Grafana, the widget follows). Not supported: dashboard
+      # variables in queries, and live/streaming datasources such as MQTT.
+      #   dashboard: PV Uebersicht   dashboard uid or title        (panel mode)
+      #   panel: Verbrauchswerte     panel id or title             (panel mode)
+      #   datasource: InfluxDB       datasource uid or name        (query mode: instead of the two above)
+      #   queries: [ { query: "..." } ]   Grafana query objects as in a panel's "targets"
+      #   display: chart             chart | stat | gauge, default from the panel type
+      #   range: 6h                  e.g. 30m, 6h, 7d; default: the dashboard's range
+      #   title / unit / decimals / min / max / legend   overrides
+      #   intervalSeconds: 60        refresh interval (minimum 10)
+      # - id: power
+      #   type: grafana.panel
+      #   connection: grafana
+      #   pos: { x: 0, y: 0, w: 4, h: 2 }
+      #   settings: { dashboard: "PV Uebersicht", panel: Verbrauchswerte, range: 24h }

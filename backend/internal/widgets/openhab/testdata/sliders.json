@@ -1,0 +1,146 @@
+{
+ "id": "Sliders",
+ "title": "Sliders",
+ "widgets": [
+  {
+   "widgetId": "sl0",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%d %%",
+   "unit": "",
+   "item": {
+    "state": "14",
+    "stateDescription": {
+     "minimum": 0,
+     "maximum": 100,
+     "step": 0.39215686274509803,
+     "pattern": "%.0f %%",
+     "readOnly": false,
+     "options": []
+    },
+    "lastStateUpdate": 1792263063315,
+    "type": "Dimmer",
+    "name": "NightLightBrightness",
+    "label": "Nachtlicht Flur Helligketi",
+    "category": "switch",
+    "tags": [
+     "Light",
+     "Control"
+    ],
+    "groupNames": [
+     "gFirstFloorHueLamp"
+    ]
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Slider",
+   "label": "Helligkeit nachtlicht [14 %]",
+   "icon": "switch",
+   "staticIcon": false,
+   "switchSupport": false,
+   "releaseOnly": false
+  },
+  {
+   "widgetId": "sl1",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "item": {
+    "state": "80",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "1",
+    "lastStateUpdate": 1792269659991,
+    "lastStateChange": 1792255237113,
+    "type": "Rollershutter",
+    "name": "SchlafzimmerShutterStreet_Master",
+    "label": "Rolladen Schlafzimme Straße",
+    "category": "blinds",
+    "tags": [
+     "Control"
+    ],
+    "groupNames": [
+     "gShellySleepingRoomShutter"
+    ]
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Slider",
+   "label": "Fenster Rechts [80]",
+   "icon": "blinds",
+   "staticIcon": false,
+   "switchSupport": false,
+   "releaseOnly": false
+  },
+  {
+   "widgetId": "sl2",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "state": "0",
+   "item": {
+    "state": "0,0,0",
+    "stateDescription": {
+     "pattern": "%s",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "30,60,100",
+    "lastStateUpdate": 1792263689900,
+    "lastStateChange": 1792263689900,
+    "type": "Color",
+    "name": "SleepingRoomAmbientLightBed",
+    "label": "Schlafzimmer Lichtfarbe",
+    "category": "colorwheel",
+    "tags": [],
+    "groupNames": []
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Slider",
+   "label": "Helligkeit [0,0,0]",
+   "icon": "colorwheel",
+   "staticIcon": false,
+   "switchSupport": false,
+   "releaseOnly": false
+  },
+  {
+   "widgetId": "sl3",
+   "visibility": true,
+   "labelSource": "SITEMAP_WIDGET",
+   "pattern": "%s",
+   "unit": "",
+   "item": {
+    "state": "28.0",
+    "stateDescription": {
+     "pattern": "%.0f",
+     "readOnly": false,
+     "options": []
+    },
+    "lastState": "20.0",
+    "lastStateUpdate": 1791627118510,
+    "lastStateChange": 1791627118510,
+    "type": "Number",
+    "name": "AllowPVBatteryDischargeAboveCents",
+    "label": "Schwelle zum erlauben der batterieentladung",
+    "tags": [],
+    "groupNames": []
+   },
+   "widgets": [],
+   "mappings": [],
+   "type": "Slider",
+   "label": "Entladen erlauben über (cent/kWh) [28]",
+   "icon": "number",
+   "staticIcon": false,
+   "switchSupport": false,
+   "releaseOnly": false,
+   "minValue": 20,
+   "maxValue": 50
+  }
+ ]
+}
