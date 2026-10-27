@@ -46,8 +46,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	hub := core.NewHub(log, version)
-	srv := server.New(hub, log, web.FS())
+	// Clients reload when this changes, so it also has to change when only the
+	// frontend was rebuilt while the -ldflags version stayed "dev".
+	frontend := web.FS()
+	fullVersion := version
+	if id := web.BuildID(frontend); id != "" {
+		fullVersion += "+" + id
+	}
+	hub := core.NewHub(log, fullVersion)
+	srv := server.New(hub, log, frontend)
 	srv.SetAllowedOrigins(cfg.Server.AllowedOrigins)
 	hub.Apply(cfg)
 

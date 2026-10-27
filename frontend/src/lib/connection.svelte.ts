@@ -6,6 +6,7 @@ export type ConnectionStatus = 'connecting' | 'online' | 'offline';
 const PING_INTERVAL = 20_000;
 const SILENCE_LIMIT = 50_000; // reconnect if the server has been silent this long
 const ACTION_TIMEOUT = 25_000;
+const RECONNECT_MAX = 5_000;
 
 /**
  * The single WebSocket to the backend: reconnects automatically, keeps the
@@ -81,7 +82,8 @@ class Connection {
       this.ws = null;
       this.status = 'offline';
       this.failPending();
-      const delay = Math.min(30_000, 1000 * 2 ** this.attempt++) * (0.75 + Math.random() * 0.5);
+      // Keep the cap low: after a redeploy the new backend should be picked up within seconds.
+      const delay = Math.min(RECONNECT_MAX, 1000 * 2 ** this.attempt++) * (0.75 + Math.random() * 0.5);
       window.setTimeout(() => this.connect(), delay);
     };
     ws.onerror = () => ws.close();
