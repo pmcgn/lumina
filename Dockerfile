@@ -6,7 +6,7 @@
 # --- types --------------------------------------------------------------
 # The *.gen.ts files are not committed: generate them from the Go models on
 # every build (tygo writes to ../frontend/src/**/*.gen.ts).
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS types
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS types
 WORKDIR /src/backend
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
@@ -14,7 +14,7 @@ COPY backend/ ./
 RUN mkdir -p /src/frontend && go tool tygo generate
 
 # --- frontend -----------------------------------------------------------
-FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend
+FROM --platform=$BUILDPLATFORM node:26-alpine AS frontend
 WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
@@ -24,7 +24,7 @@ COPY --from=types /src/frontend/src/ ./src/
 RUN npm run build
 
 # --- backend ------------------------------------------------------------
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS backend
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS backend
 WORKDIR /src/backend
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
@@ -38,7 +38,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldfl
 # --- prep (native platform, files only) ---------------------------------
 # Everything that needs a RUN happens here, so the runtime stage below has no
 # RUN step and never executes under emulation.
-FROM --platform=$BUILDPLATFORM alpine:3.21 AS prep
+FROM --platform=$BUILDPLATFORM alpine:3.24 AS prep
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 # Strip CRs in case of a Windows checkout; they would break the shebang.
 RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod 755 /docker-entrypoint.sh \
@@ -46,7 +46,7 @@ RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod 755 /docker-entrypoint.sh \
 
 # --- runtime ------------------------------------------------------------
 # Alpine instead of distroless: the entrypoint is a small shell script.
-FROM alpine:3.21
+FROM alpine:3.24
 COPY --from=backend /out/lumina /lumina
 # Default config; the entrypoint copies it to /config/config.yaml if missing
 # (a mounted /config hides anything baked into it).
