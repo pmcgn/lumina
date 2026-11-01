@@ -38,6 +38,13 @@ function Require($name) {
 if (-not $SkipBuild) {
   Require go
   Require npm
+  Write-Host '== generating TypeScript types' -ForegroundColor Cyan
+  Push-Location (Join-Path $root 'backend')
+  try {
+    go tool tygo generate
+    if ($LASTEXITCODE) { throw 'type generation failed' }
+  } finally { Pop-Location }
+
   Write-Host '== building frontend' -ForegroundColor Cyan
   Push-Location (Join-Path $root 'frontend')
   try {

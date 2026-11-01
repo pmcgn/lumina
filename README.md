@@ -52,7 +52,7 @@ cd frontend && npm run build      # writes into backend/internal/web/dist
 cd ../backend && go build -o lumina ./cmd/lumina
 ```
 
-Types shared with the frontend are generated from the Go data models (`model.go` per widget, `config/client.go`, `core/protocol.go`) into `frontend/**/*.gen.ts` by [tygo](https://github.com/gzuidhof/tygo). After changing a model, run this in `backend/` and commit the result:
+Types shared with the frontend are generated from the Go data models (`model.go` per widget, `config/client.go`, `core/protocol.go`) into `frontend/**/*.gen.ts` by [tygo](https://github.com/gzuidhof/tygo). These files are **not committed** (git-ignored). The container build and the release pipeline generate them on every run; locally, run this in `backend/` once after cloning (before `npm run dev`, `npm run check` or `npm run build`) and again after changing a model:
 
 ```sh
 go tool tygo generate

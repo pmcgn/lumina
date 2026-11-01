@@ -3,12 +3,23 @@
 # Build stages run on the builder's native platform ($BUILDPLATFORM) and
 # cross-compile, so nothing is emulated for the arm64 image.
 
+# --- types --------------------------------------------------------------
+# The *.gen.ts files are not committed: generate them from the Go models on
+# every build (tygo writes to ../frontend/src/**/*.gen.ts).
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS types
+WORKDIR /src/backend
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ ./
+RUN mkdir -p /src/frontend && go tool tygo generate
+
 # --- frontend -----------------------------------------------------------
 FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend
 WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
+COPY --from=types /src/frontend/src/ ./src/
 # Vite writes into ../backend/internal/web/dist (embedded by the Go build).
 RUN npm run build
 

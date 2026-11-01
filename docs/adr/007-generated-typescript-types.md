@@ -7,9 +7,9 @@ Every widget's data shape existed twice: as Go structs and as hand-written TypeS
 
 ## Decision
 - Generate the TypeScript with **tygo**, used as a **CLI tool** pinned in `backend/go.mod` (`go tool tygo generate`, config in `backend/tygo.yaml`). It is a build-time tool only and is not part of the server binary or the container image.
-- Only the **wire models** are converted: `model.go` in each widget package, `config/client.go` (the config sent to the browser) and `core/protocol.go` (envelope and widget state). Provider internals stay out. Output goes to `frontend/**/*.gen.ts` and is committed.
+- Only the **wire models** are converted: `model.go` in each widget package, `config/client.go` (the config sent to the browser) and `core/protocol.go` (envelope and widget state). Provider internals stay out. Output goes to `frontend/**/*.gen.ts` and is **not committed** (git-ignored, changed 2026-11-01): the Dockerfile has a `types` stage that generates it on every build, developers run the command once after cloning and after changing a model.
 - String enums become TypeScript unions (`enum_style: union`); this needs Go consts prefixed with the type name (`ConditionRain`, `RowKindSwitch`).
-- A Go test (`internal/typegen`) regenerates into a temp folder and fails if the committed files differ. It is the safety net until there is CI.
+- A Go test (`internal/typegen`) regenerates into a temp folder and fails if generation breaks or a package in `tygo.yaml` produces no file. Staleness cannot occur any more, since nothing generated is committed.
 - The frontend re-exports the generated types under its own names in each widget's `types.ts`; a rename on the Go side now fails `svelte-check`.
 
 ## Settings (added 2026-10-18)

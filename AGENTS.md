@@ -12,7 +12,7 @@ Lumina: self-hosted home dashboard for a wall-mounted Android tablet. Go backend
 
 ```sh
 cd backend  && go vet ./... && go test ./...      # live tests are skipped unless env vars are set
-cd backend  && go tool tygo generate               # regenerate frontend/**/*.gen.ts after changing a wire model
+cd backend  && go tool tygo generate               # generate frontend/**/*.gen.ts: run once after cloning and after changing a wire model (not committed)
 cd frontend && npm run check && npm test          # type check + vitest
 cd frontend && npm run build                      # writes into backend/internal/web/dist
 cd backend  && go build ./cmd/lumina           # embeds the built frontend: rebuild after every frontend build
@@ -30,7 +30,7 @@ Backend: package in `internal/widgets/<name>` implementing `widget.Provider` (+ 
 - **Secrets stay in `connections`**, referenced by name; settings reach the browser, connections never. Never log or echo feed URLs or tokens. Pass tokens via `${ENV}` in YAML (full-line comments are not expanded).
 - **No login (LAN only)**: write actions are validated server-side against what the widget rendered, and every widget supports `readOnly`.
 - **Production systems** (the user's openHAB, Vikunja): read-only unless told otherwise; prefer `demo-services`. Delete any test data you create. Live tests need `VIKUNJA_URL/TOKEN`, `OPENHAB_URL/SITEMAP`, `CALENDAR_URL`, `GRAFANA_URL/TOKEN/DASHBOARD/PANELS`.
-- **Types are generated, not copied** (ADR-007): wire models live in `model.go` (per widget), `config/client.go` and `core/protocol.go`; tygo turns them into `*.gen.ts`. Never edit those by hand; run `go tool tygo generate` and commit the result (the test in `internal/typegen` fails if they are stale). String enums need Go consts prefixed with the type name (`ConditionRain`) to become TypeScript unions. Widget settings are typed Go structs too (`Settings` in `model.go`, flexible YAML values via `widget.StringList` / `widget.FlexString`), so they are generated as well; a test checks that every widget type validates its settings strictly.
+- **Types are generated, not copied** (ADR-007): wire models live in `model.go` (per widget), `config/client.go` and `core/protocol.go`; tygo turns them into `*.gen.ts`. Never edit those by hand or commit them; they are git-ignored, so run `go tool tygo generate` (in `backend/`) after cloning and after every model change; the Dockerfile and the release workflow generate them on every build (a `types` stage), and the test in `internal/typegen` only checks that generation works. String enums need Go consts prefixed with the type name (`ConditionRain`) to become TypeScript unions. Widget settings are typed Go structs too (`Settings` in `model.go`, flexible YAML values via `widget.StringList` / `widget.FlexString`), so they are generated as well; a test checks that every widget type validates its settings strictly.
 - Keep frontend widgets dumb: data comes from the backend model, formatting and relative times are done in the browser (see `lib/dates.ts`, `widgets/calendar/agenda.ts`), with unit tests for date logic.
 - Use `svelte-check` with TypeScript 5.x (7 is unsupported). Don't `taskkill msedge.exe` (closes the user's browser); use a separate `--user-data-dir` for headless screenshots.
 - Write Go files with the file tools: generating Go strings containing backslashes through shell/Python heredocs gets mangled.

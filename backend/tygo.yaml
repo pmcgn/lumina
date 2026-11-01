@@ -1,6 +1,7 @@
 # Generates the TypeScript types of the data the backend sends to the browser.
 # Run from backend/:   go tool tygo generate
-# The output (*.gen.ts) is committed; a Go test fails when it is out of date.
+# The output (*.gen.ts) is git-ignored: the Dockerfile generates it on every build,
+# developers run the command above once after checking out and after changing a model.
 #
 # Only the wire model of each package is converted (model.go), never provider
 # internals. Add a widget: add a package block here and keep its data types in model.go.
