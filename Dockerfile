@@ -20,9 +20,18 @@ ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/lumina ./cmd/lumina
 
 # --- runtime ------------------------------------------------------------
-FROM gcr.io/distroless/static-debian12:nonroot
+# Alpine instead of distroless: the entrypoint is a small shell script.
+FROM alpine:3.21
+RUN addgroup -S -g 65532 nonroot \
+ && adduser -S -u 65532 -G nonroot nonroot \
+ && mkdir /config && chown nonroot:nonroot /config
 COPY --from=backend /out/lumina /lumina
-COPY config/config.example.yaml /config/config.yaml
+# Default config; the entrypoint copies it to /config/config.yaml if missing
+# (a mounted /config hides anything baked into it).
+COPY config/config.example.yaml /usr/share/lumina/config.yaml
+COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
+# Strip CRs in case of a Windows checkout; they would break the shebang.
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod 755 /docker-entrypoint.sh
 EXPOSE 8080
 USER nonroot:nonroot
-ENTRYPOINT ["/lumina"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
