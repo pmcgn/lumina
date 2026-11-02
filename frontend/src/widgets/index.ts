@@ -7,3 +7,5 @@ registerWidget('vikunja.tasks', { component: () => import('./vikunja/Vikunja.sve
 registerWidget('openhab.sitemap', { component: () => import('./openhab/OpenHab.svelte') });
 registerWidget('calendar.agenda', { component: () => import('./calendar/Calendar.svelte') });
 registerWidget('grafana.panel', { component: () => import('./grafana/Grafana.svelte') });
+// Same component as grafana.panel: both send the same data shape (a value or series, unit, thresholds).
+registerWidget('mqtt.value', { component: () => import('./grafana/Grafana.svelte') });

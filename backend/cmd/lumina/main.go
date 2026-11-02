@@ -21,6 +21,7 @@ import (
 	_ "github.com/pmcgn/lumina/internal/widgets/calendar"
 	_ "github.com/pmcgn/lumina/internal/widgets/clock"
 	_ "github.com/pmcgn/lumina/internal/widgets/grafana"
+	_ "github.com/pmcgn/lumina/internal/widgets/mqtt"
 	_ "github.com/pmcgn/lumina/internal/widgets/openhab"
 	_ "github.com/pmcgn/lumina/internal/widgets/vikunja"
 	_ "github.com/pmcgn/lumina/internal/widgets/weather"

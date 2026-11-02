@@ -48,6 +48,14 @@ connections: {}
   #   grafana:
   #     url: https://grafana.example.lan
   #     token: ${GRAFANA_TOKEN}      # service account token, role Viewer (read-only)
+  #   mqtt:
+  #     url: mqtt.local:1883         # host[:port]; plain TCP by default (port 1883)
+  #     # username: lumina           # optional login
+  #     # password: ${MQTT_PASSWORD}
+  #     # clientId: lumina           # optional; the widget id is appended so several widgets can share a connection. Default: lumina-<random>
+  #     # tls: true                  # optional encryption (default port 8883); also implied by ssl:// or mqtts://
+  #     # caFile: /certs/ca.pem      # optional: trust this CA instead of the system roots
+  #     # insecureSkipVerify: true   # optional: accept any server certificate (self-signed brokers)
   #   openhab:
   #     url: http://openhab.local:8080
   #     # token: ${OPENHAB_TOKEN}    # only if your openHAB requires an API token
@@ -129,7 +137,7 @@ pages:
       # widget re-runs the panel's queries through Grafana's query API, so every datasource
       # Grafana supports works, and it takes unit, thresholds, min/max and time range from the
       # panel (edit the panel in Grafana, the widget follows). Not supported: dashboard
-      # variables in queries, and live/streaming datasources such as MQTT.
+      # variables in queries, and live/streaming datasources such as MQTT (use mqtt.value for those).
       #   dashboard: PV Uebersicht   dashboard uid or title        (panel mode)
       #   panel: Verbrauchswerte     panel id or title             (panel mode)
       #   datasource: InfluxDB       datasource uid or name        (query mode: instead of the two above)
@@ -143,3 +151,17 @@ pages:
       #   connection: grafana
       #   pos: { x: 0, y: 0, w: 4, h: 2 }
       #   settings: { dashboard: "PV Uebersicht", panel: Verbrauchswerte, range: 24h }
+
+      # MQTT: shows one numeric value of an MQTT topic as stat, gauge or chart (broker, login and TLS
+      # are set in the connection). The chart/sparkline covers what was received since the start.
+      #   topic: victron/dc/soc      no wildcards
+      #   valuePath: value           field of a JSON payload, e.g. data.soc; default: a plain number, or "value" of a JSON object
+      #   display: stat              stat | gauge | chart
+      #   range: 6h                  time range of the chart/sparkline
+      #   title / unit / decimals / min / max   as for grafana.panel
+      #   thresholds: [ { color: red }, { value: 20, color: green } ]
+      # - id: battery
+      #   type: mqtt.value
+      #   connection: mqtt
+      #   pos: { x: 4, y: 0, w: 2, h: 2 }
+      #   settings: { topic: victron/dc/soc, title: Batterie, display: gauge, unit: percent, min: 0, max: 100 }

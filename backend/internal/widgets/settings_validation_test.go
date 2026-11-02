@@ -14,6 +14,7 @@ import (
 	_ "github.com/pmcgn/lumina/internal/widgets/calendar"
 	_ "github.com/pmcgn/lumina/internal/widgets/clock"
 	_ "github.com/pmcgn/lumina/internal/widgets/grafana"
+	_ "github.com/pmcgn/lumina/internal/widgets/mqtt"
 	_ "github.com/pmcgn/lumina/internal/widgets/openhab"
 	_ "github.com/pmcgn/lumina/internal/widgets/vikunja"
 	_ "github.com/pmcgn/lumina/internal/widgets/weather"
@@ -43,6 +44,9 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"grafana.panel", m{"dashboard": "PV", "panel": 34}, ""},
 		{"grafana.panel", m{"datasource": "InfluxDB", "queries": []any{m{"refId": "A", "query": "x"}}, "title": "T"}, ""},
 
+		{"mqtt.value", m{"topic": "victron/dc/soc", "display": "gauge", "unit": "percent", "min": 0, "max": 100, "valuePath": "value"}, ""},
+		{"mqtt.value", m{"topic": "a/b", "thresholds": []any{m{"color": "red"}, m{"value": 20, "color": "#0a0"}}}, ""},
+
 		// typos name the valid settings
 		{"core.clock", m{"timezon": "UTC"}, `unknown setting "timezon"`},
 		{"weather.forecast", m{"locaton": "Köln"}, `unknown setting "locaton"`},
@@ -51,6 +55,8 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"calendar.agenda", m{"calendars": []any{"family"}, "day": 7}, `unknown setting "day"`},
 
 		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "rang": "6h"}, `unknown setting "rang"`},
+
+		{"mqtt.value", m{"topic": "a/b", "topik": "x"}, `unknown setting "topik"`},
 
 		// wrong types
 		{"core.clock", m{"showSeconds": "yes"}, `setting "showSeconds"`},
@@ -72,7 +78,13 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "min": 10, "max": 5}, `"min" must be smaller`},
 		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "decimals": 20}, `setting "decimals"`},
 
+		{"mqtt.value", m{"topic": "a/#"}, "wildcards"},
+		{"mqtt.value", m{"topic": "a/b", "display": "pie"}, `setting "display"`},
+		{"mqtt.value", m{"topic": "a/b", "range": "soon"}, `setting "range"`},
+		{"mqtt.value", m{"topic": "a/b", "thresholds": []any{m{"color": "red;x"}}}, "invalid color"},
+
 		// required values
+		{"mqtt.value", m{}, `"topic" is required`},
 		{"openhab.sitemap", m{}, `"sitemap" is required`},
 		{"weather.forecast", m{}, "set either latitude and longitude, or location"},
 		{"weather.forecast", m{"latitude": 50.0}, "together"},
