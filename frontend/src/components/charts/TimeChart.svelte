@@ -18,9 +18,16 @@
     /** Fixed value range; default: from the data. */
     min?: number;
     max?: number;
+    /** While a finger / the mouse is down: the inspected time and each series' value there. The parent shows the readout. */
+    inspected?: Inspected | null;
   }
 
-  let { series, from, to, formatX, formatY, min, max }: Props = $props();
+  export interface Inspected {
+    t: number;
+    rows: { name: string; color: string; v: number }[];
+  }
+
+  let { series, from, to, formatX, formatY, min, max, inspected = $bindable(null) }: Props = $props();
 
   const uid = $props.id();
   let width = $state(0);
@@ -85,6 +92,19 @@
   // Inspect with a finger or the mouse: values of all series at the nearest time.
   const nearest = bisector<{ t: number; v: number }, number>((p) => p.t).center;
   let cursor = $state<{ px: number; t: number; rows: { name: string; color: string; v: number }[] } | null>(null);
+  function release() {
+    cursor = null;
+    inspected = null;
+  }
+  function press(e: PointerEvent) {
+    // keep receiving moves when the finger leaves the chart or drifts vertically
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* not capturable: moves still arrive while over the chart */
+    }
+    inspect(e);
+  }
   function inspect(e: PointerEvent) {
     const box = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const px = Math.min(Math.max(e.clientX - box.left - left, 0), innerW);
@@ -93,7 +113,9 @@
       .filter((s) => s.points.length)
       .map((s) => ({ name: s.name, color: s.color, v: s.points[nearest(s.points, t)].v }));
     const first = series.find((s) => s.points.length);
-    cursor = { px, t: first ? first.points[nearest(first.points, t)].t : t, rows };
+    const at = first ? first.points[nearest(first.points, t)].t : t;
+    cursor = { px, t: at, rows };
+    inspected = { t: at, rows };
   }
 </script>
 
@@ -102,11 +124,11 @@
   bind:clientWidth={width}
   bind:clientHeight={height}
   role="presentation"
-  onpointerdown={inspect}
+  onpointerdown={press}
   onpointermove={(e) => cursor && inspect(e)}
-  onpointerup={() => (cursor = null)}
-  onpointercancel={() => (cursor = null)}
-  onpointerleave={() => (cursor = null)}
+  onpointerup={release}
+  onpointercancel={release}
+  onlostpointercapture={release}
 >
   {#if width > 0 && height > 0 && all.length > 1}
     <svg {width} {height} aria-hidden="true">
@@ -145,14 +167,6 @@
         {/if}
       </g>
     </svg>
-    {#if cursor}
-      <div class="tip" style:left="{Math.min(Math.max(left + cursor.px, 90), width - 90)}px">
-        <div class="when">{formatX(cursor.t)}</div>
-        {#each cursor.rows as r (r.name)}
-          <div class="row"><i style:background={r.color}></i><span class="n">{r.name}</span><b>{formatY(r.v)}</b></div>
-        {/each}
-      </div>
-    {/if}
   {/if}
 </div>
 
@@ -162,7 +176,9 @@
     width: 100%;
     height: 100%;
     min-height: 0;
-    touch-action: pan-y;
+    touch-action: none; /* a finger on the chart inspects it instead of scrolling */
+    user-select: none;
+    -webkit-user-select: none;
   }
   svg {
     display: block;
@@ -179,41 +195,5 @@
   .cursor {
     stroke: var(--muted);
     stroke-dasharray: 3 3;
-  }
-  .tip {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
-    min-width: 120px;
-    max-width: 220px;
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-s);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    font-size: 12px;
-    pointer-events: none;
-  }
-  .when {
-    color: var(--muted);
-    margin-bottom: 2px;
-  }
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .row i {
-    flex: none;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-  .row .n {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 </style>

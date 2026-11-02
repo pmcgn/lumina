@@ -3,7 +3,7 @@
   import type { WidgetProps } from '../../lib/registry';
   import { formatParts, formatValue } from '../../lib/units';
   import Sparkline from '../../components/charts/Sparkline.svelte';
-  import TimeChart from '../../components/charts/TimeChart.svelte';
+  import TimeChart, { type Inspected } from '../../components/charts/TimeChart.svelte';
   import BatteryIcon from '../../components/BatteryIcon.svelte';
   import { arcPath, batteryColor, batteryPercent, fraction, gaugeRange, hasThresholds, last, seriesColor, thresholdColor, timeFormat } from './logic';
   import type { Data, Settings } from './model.gen';
@@ -34,6 +34,13 @@
   const valueArc = $derived(arcPath(100, 100, R, 0, Math.max(frac, 0.004)));
   const xFormat = $derived(timeFormat(data.to - data.from, locale));
 
+  // finger readout above the chart: shown only while a finger is down
+  let inspected = $state<Inspected | null>(null);
+  const readoutFormat = $derived(
+    new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }),
+  );
+  const readoutTime = (t: number) => readoutFormat.format(t);
+
   // battery: 0..100 whatever the panel's min/max say
   const battStyle = $derived(settings.batteryStyle ?? 'classic');
   const orientation = $derived(settings.batteryOrientation ?? 'horizontal');
@@ -52,6 +59,14 @@
 </script>
 
 <div class="g">
+  {#if data.display === 'chart' && inspected}
+    <div class="readout">
+      <span class="when">{readoutTime(inspected.t)}</span>
+      {#each inspected.rows as r (r.name)}
+        <span class="item"><i style:background={r.color}></i><span class="n">{r.name}</span><b>{fmt(r.v)}</b></span>
+      {/each}
+    </div>
+  {/if}
   <header>
     <h2>{data.title}</h2>
     {#if data.warnings?.length}
@@ -63,7 +78,7 @@
     <div class="empty">{t('grafana.noData')}</div>
   {:else if data.display === 'chart'}
     <div class="plot">
-      <TimeChart {series} from={data.from} to={data.to} formatX={xFormat} formatY={fmt} min={data.min} max={data.max} />
+      <TimeChart {series} from={data.from} to={data.to} formatX={xFormat} formatY={fmt} min={data.min} max={data.max} bind:inspected />
     </div>
     {#if showLegend && !compact}
       <ul class="legend">
@@ -121,6 +136,7 @@
 
 <style>
   .g {
+    position: relative;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -140,6 +156,46 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .readout {
+    position: absolute;
+    z-index: 1;
+    top: var(--space-2);
+    left: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-s);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-size: var(--text-s);
+    pointer-events: none;
+  }
+  .readout .when {
+    color: var(--muted);
+  }
+  .readout .item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .readout i {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+  .readout .n {
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 14em;
   }
   .warn {
     flex: none;
