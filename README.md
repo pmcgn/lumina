@@ -2,6 +2,7 @@
 
 A self-hosted, responsive home dashboard for a wall-mounted tablet. A Go backend polls your services and pushes live updates over one WebSocket to a lightweight Svelte frontend. Everything is rendered natively (no iFrames), via widgets.
 
+- Widgets and their configuration: [WIDGETS.md](WIDGETS.md)
 - Requirements: [docs/requirements.md](docs/requirements.md)
 - Architecture decisions: [docs/adr/](docs/adr/README.md)
 

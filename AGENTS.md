@@ -26,6 +26,8 @@ Backend: package in `internal/widgets/<name>` implementing `widget.Provider` (+ 
 
 ## Rules and gotchas
 
+- **Keep [WIDGETS.md](WIDGETS.md) up to date**: whenever a widget's settings or connection options change (added, removed, renamed, new default or validation rule) or a new widget is added, update WIDGETS.md in the same change: the overview table, one table per widget (setting, type, required, default, description) and a YAML example. Also update the commented examples in `config/config.example.yaml` and the widget list in `README.md`.
+
 - **Browser baseline is Chrome 80** (older Android tablets): no `color-mix()`, `:has()`, container queries; use the tokens in `tokens.css`. Hover styles go in `@media (hover: hover)`.
 - **Secrets stay in `connections`**, referenced by name; settings reach the browser, connections never. Never log or echo feed URLs or tokens. Pass tokens via `${ENV}` in YAML (full-line comments are not expanded).
 - **No login (LAN only)**: write actions are validated server-side against what the widget rendered, and every widget supports `readOnly`.
