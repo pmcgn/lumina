@@ -94,9 +94,24 @@ func parseSettings(m map[string]any) (Settings, error) {
 		return s, fmt.Errorf("setting %q: wildcards are not supported, give the topic of one value", "topic")
 	}
 	switch s.Display {
-	case "", DisplayChart, DisplayStat, DisplayGauge:
+	case "", DisplayChart, DisplayStat, DisplayGauge, DisplayBattery:
 	default:
-		return s, fmt.Errorf("setting %q: %q is invalid (stat, gauge, chart)", "display", s.Display)
+		return s, fmt.Errorf("setting %q: %q is invalid (stat, gauge, chart, battery)", "display", s.Display)
+	}
+	switch s.BatteryStyle {
+	case "", BatteryStyleClassic, BatteryStyleMinimal:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (classic, minimal)", "batteryStyle", s.BatteryStyle)
+	}
+	switch s.BatteryValue {
+	case "", BatteryValueNone, BatteryValueInline, BatteryValueSide:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (none, inline, side)", "batteryValue", s.BatteryValue)
+	}
+	switch s.BatteryOrientation {
+	case "", BatteryOrientationHorizontal, BatteryOrientationVertical:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (horizontal, vertical)", "batteryOrientation", s.BatteryOrientation)
 	}
 	if s.Range != "" {
 		if _, ok := parseRange(s.Range); !ok {

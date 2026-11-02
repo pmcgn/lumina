@@ -8,9 +8,35 @@ package mqtt
 type Display string
 
 const (
-	DisplayChart Display = "chart" // time series of the values received since start
-	DisplayStat  Display = "stat"  // one big value with a sparkline
-	DisplayGauge Display = "gauge" // value on a dial between min and max
+	DisplayChart   Display = "chart"   // time series of the values received since start
+	DisplayStat    Display = "stat"    // one big value with a sparkline
+	DisplayGauge   Display = "gauge"   // value on a dial between min and max
+	DisplayBattery Display = "battery" // value as a battery icon, 0-100 (min/max are ignored)
+)
+
+// BatteryStyle is the look of the battery icon.
+type BatteryStyle string
+
+const (
+	BatteryStyleClassic BatteryStyle = "classic" // solid icon, red / orange / green by charge (or the thresholds)
+	BatteryStyleMinimal BatteryStyle = "minimal" // thin outline, one accent color
+)
+
+// BatteryValue is where the number of a battery is shown.
+type BatteryValue string
+
+const (
+	BatteryValueNone   BatteryValue = "none"   // icon only
+	BatteryValueInline BatteryValue = "inline" // inside the icon
+	BatteryValueSide   BatteryValue = "side"   // next to the icon
+)
+
+// BatteryOrientation is how the battery icon is laid out.
+type BatteryOrientation string
+
+const (
+	BatteryOrientationHorizontal BatteryOrientation = "horizontal"
+	BatteryOrientationVertical   BatteryOrientation = "vertical"
 )
 
 // Data is the widget's data model.
@@ -51,8 +77,13 @@ type Settings struct {
 	Topic     string  `json:"topic"`               // topic to subscribe to; no wildcards
 	ValuePath string  `json:"valuePath,omitempty"` // path into a JSON payload, e.g. "value" or "data.soc"; default: the payload itself, or "value" if it is a JSON object
 	Title     string  `json:"title,omitempty"`     // heading; default: the topic
-	Display   Display `json:"display,omitempty"`   // stat | gauge | chart; default stat
+	Display   Display `json:"display,omitempty"`   // stat | gauge | chart | battery; default stat
 	Range     string  `json:"range,omitempty"`     // time range of a chart or sparkline, e.g. 30m, 6h; default 6h
+
+	// Battery display only.
+	BatteryStyle       BatteryStyle       `json:"batteryStyle,omitempty"`       // classic | minimal; default classic
+	BatteryValue       BatteryValue       `json:"batteryValue,omitempty"`       // none | inline | side; default side
+	BatteryOrientation BatteryOrientation `json:"batteryOrientation,omitempty"` // horizontal | vertical; default horizontal
 
 	Unit       string      `json:"unit,omitempty"`
 	Decimals   *int        `json:"decimals,omitempty"`

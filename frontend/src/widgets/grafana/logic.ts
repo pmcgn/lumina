@@ -41,6 +41,19 @@ export function gaugeRange(d: Pick<Data, 'min' | 'max' | 'unit' | 'thresholds'>,
 /** Position of a value on the dial, 0..1. */
 export const fraction = (value: number, lo: number, hi: number): number => Math.min(1, Math.max(0, (value - lo) / (hi - lo)));
 
+/** Charge of a battery in percent, 0..100. min/max of the panel are ignored; a 0..1 unit ("percentunit") is scaled. */
+export function batteryPercent(value: number, unit: string | undefined): number {
+  if (!Number.isFinite(value)) return 0;
+  const pct = unit === 'percentunit' ? value * 100 : value;
+  return Math.min(100, Math.max(0, pct));
+}
+
+/** Fill color of a battery: the thresholds if there are any, else red up to 15 %, orange up to 30 %, green. */
+export function batteryColor(pct: number, thresholds: Threshold[] | undefined): string {
+  if (hasThresholds(thresholds)) return thresholdColor(pct, thresholds, 'var(--accent)');
+  return pct <= 15 ? 'var(--danger)' : pct <= 30 ? 'var(--warn)' : 'var(--ok)';
+}
+
 /** SVG path of a half-circle arc from fraction a to fraction b (0 = left end, 1 = right end). */
 export function arcPath(cx: number, cy: number, r: number, a: number, b: number): string {
   const point = (f: number) => {

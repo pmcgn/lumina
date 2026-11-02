@@ -13,8 +13,8 @@ Settings are validated strictly when the config is loaded: an unknown or mistype
 | [`calendar.agenda`](#calendaragenda) | Agenda and month overview from iCal feeds | one per calendar, listed in `settings.calendars` | no |
 | [`vikunja.tasks`](#vikunjatasks) | Open Vikunja tasks, complete with undo, quick add | `vikunja` | yes |
 | [`openhab.sitemap`](#openhabsitemap) | An openHAB sitemap, live, operable | `openhab` | yes |
-| [`grafana.panel`](#grafanapanel) | A Grafana panel as chart, stat or gauge | `grafana` | no |
-| [`mqtt.value`](#mqttvalue) | One numeric MQTT value as stat, gauge or chart | `mqtt` | no |
+| [`grafana.panel`](#grafanapanel) | A Grafana panel as chart, stat, gauge or battery | `grafana` | no |
+| [`mqtt.value`](#mqttvalue) | One numeric MQTT value as stat, gauge, chart or battery | `mqtt` | no |
 
 ## Common widget fields
 
@@ -199,7 +199,7 @@ pages:
 
 ## grafana.panel
 
-Draws a panel of an existing Grafana dashboard natively as chart, stat or gauge. The widget re-runs the panel's queries through Grafana's query API, so every datasource Grafana supports works. Unit, thresholds, min/max and time range come from the panel (edit the panel in Grafana, the widget follows) unless overridden here.
+Draws a panel of an existing Grafana dashboard natively as chart, stat, gauge or battery. The widget re-runs the panel's queries through Grafana's query API, so every datasource Grafana supports works. Unit, thresholds, min/max and time range come from the panel (edit the panel in Grafana, the widget follows) unless overridden here.
 
 Not supported: dashboard variables in queries, and live/streaming datasources such as MQTT (use [`mqtt.value`](#mqttvalue) for those).
 
@@ -214,7 +214,10 @@ Use one of two modes: **panel mode** (`dashboard` + `panel`) or **query mode** (
 | `datasource` | string | query mode | | Datasource uid or name. |
 | `queries` | list of maps | query mode | | Grafana query objects as in a panel's `targets`, e.g. `{ refId: A, expr: "up" }`. |
 | `title` | string | no | the panel title | Heading. |
-| `display` | string | no | from the panel type | `chart`, `stat` or `gauge`. |
+| `display` | string | no | from the panel type | `chart`, `stat`, `gauge` or `battery`. |
+| `batteryStyle` | string | no | `classic` | Only for `display: battery`. Look of the icon: `classic` (solid, colored by charge) or `minimal` (thin outline, one accent color). See [Battery display](#battery-display). |
+| `batteryValue` | string | no | `side` | Only for `display: battery`. Where the number is shown: `none` (icon only), `inline` (inside the icon) or `side` (next to it). |
+| `batteryOrientation` | string | no | `horizontal` | Only for `display: battery`. `horizontal` or `vertical` icon. |
 | `range` | string | no | the dashboard's range, else `6h` | Time range, e.g. `30m`, `6h`, `7d`. |
 | `unit` | string | no | from the panel | Grafana unit id, e.g. `watt`, `percent`, `celsius`. In query mode this is the only source of the unit. |
 | `decimals` | int | no | automatic | Fixed number of decimals (0-10). |
@@ -223,6 +226,48 @@ Use one of two modes: **panel mode** (`dashboard` + `panel`) or **query mode** (
 | `legend` | bool | no | when there are several series | Names and values below a chart. |
 | `intervalSeconds` | int | no | `60` | Refresh interval (minimum 10). |
 | `maxPoints` | int | no | `300` | Points per series sent to the browser (50-1000). |
+
+### Battery display
+
+`display: battery` draws the latest value as a battery icon, in the style of the weather icons. The charge is always read as 0-100 (`min` and `max` are ignored; a `percentunit` value of 0-1 is scaled). Without a unit the number is shown with `%`.
+
+Three settings shape it: `batteryStyle` (the look), `batteryValue` (where the number is shown) and `batteryOrientation` (the layout of the icon). In all screenshots the columns are `batteryValue: none`, `inline` and `side`, and the rows show 100, 62, 28, 9 and 0 %.
+
+#### `batteryStyle: classic` (default)
+
+A solid icon. The fill is red up to 15 %, orange up to 30 % and green above; with `thresholds` their colors are used instead. Inline text switches to white over the filled part so it stays readable.
+
+| Horizontal, light | Horizontal, dark |
+|---|---|
+| ![Classic, horizontal, light theme](docs/images/battery/classic/horizontal-light.png) | ![Classic, horizontal, dark theme](docs/images/battery/classic/horizontal-dark.png) |
+
+| Vertical, light | Vertical, dark |
+|---|---|
+| ![Classic, vertical, light theme](docs/images/battery/classic/vertical-light.png) | ![Classic, vertical, dark theme](docs/images/battery/classic/vertical-dark.png) |
+
+On small cards the icon shrinks to fit (dark theme):
+
+| Horizontal | Vertical |
+|---|---|
+| ![Classic, horizontal, small cards](docs/images/battery/classic/small-horizontal.png) | ![Classic, vertical, small cards](docs/images/battery/classic/small-vertical.png) |
+
+#### `batteryStyle: minimal`
+
+A thin outline with a translucent fill in the accent color and light text, matching the stat and gauge displays. The color does not change with the charge and thresholds are not used.
+
+| Horizontal, light | Horizontal, dark |
+|---|---|
+| ![Minimal, horizontal, light theme](docs/images/battery/minimal/horizontal-light.png) | ![Minimal, horizontal, dark theme](docs/images/battery/minimal/horizontal-dark.png) |
+
+| Vertical, light | Vertical, dark |
+|---|---|
+| ![Minimal, vertical, light theme](docs/images/battery/minimal/vertical-light.png) | ![Minimal, vertical, dark theme](docs/images/battery/minimal/vertical-dark.png) |
+
+On small cards the icon shrinks to fit (dark theme):
+
+| Horizontal | Vertical |
+|---|---|
+| ![Minimal, horizontal, small cards](docs/images/battery/minimal/small-horizontal.png) | ![Minimal, vertical, small cards](docs/images/battery/minimal/small-vertical.png) |
 
 ```yaml
 connections:
@@ -254,13 +299,25 @@ pages:
             - { refId: A, query: "from(bucket: \"home\") |> range(start: -6h)" }
           display: stat
           unit: watt
+      # battery: the latest value as a battery icon (0-100, min/max are ignored)
+      - id: soc
+        type: grafana.panel
+        connection: grafana
+        pos: { x: 6, y: 0, w: 2, h: 2 }
+        settings:
+          dashboard: PV Uebersicht
+          panel: Batterie
+          display: battery
+          batteryStyle: minimal
+          batteryValue: inline
+          batteryOrientation: vertical
 ```
 
 ---
 
 ## mqtt.value
 
-Shows one numeric value of an MQTT topic as stat (big value with sparkline), gauge or chart. The widget subscribes to the topic and updates live. The chart and sparkline cover what was received since Lumina started (nothing is persisted). Broker, login and TLS are set in the connection.
+Shows one numeric value of an MQTT topic as stat (big value with sparkline), gauge, chart or battery icon. The widget subscribes to the topic and updates live. The chart and sparkline cover what was received since Lumina started (nothing is persisted). Broker, login and TLS are set in the connection.
 
 Connection options:
 
@@ -281,13 +338,18 @@ Widget settings:
 | `topic` | string | yes | | Topic of one value. Wildcards (`+`, `#`) are not supported. |
 | `valuePath` | string | no | the payload itself, or `value` if it is a JSON object | Path into a JSON payload, e.g. `value` or `data.soc`. |
 | `title` | string | no | the topic | Heading. |
-| `display` | string | no | `stat` | `stat`, `gauge` or `chart`. |
+| `display` | string | no | `stat` | `stat`, `gauge`, `chart` or `battery`. |
+| `batteryStyle` | string | no | `classic` | Only for `display: battery`. Look of the icon: `classic` (solid, colored by charge) or `minimal` (thin outline, one accent color). See [Battery display](#battery-display). |
+| `batteryValue` | string | no | `side` | Only for `display: battery`. Where the number is shown: `none` (icon only), `inline` (inside the icon) or `side` (next to it). |
+| `batteryOrientation` | string | no | `horizontal` | Only for `display: battery`. `horizontal` or `vertical` icon. |
 | `range` | string | no | `6h` | Time range of the chart or sparkline, e.g. `30m`, `6h`, `1d`. |
 | `unit` | string | no | | Unit id, e.g. `watt`, `percent`, `celsius`. |
 | `decimals` | int | no | automatic | Fixed number of decimals (0-10). |
 | `min` | number | no | | Lower bound (gauge); must be smaller than `max`. |
 | `max` | number | no | | Upper bound (gauge). |
 | `thresholds` | list | no | | Color steps `{ value, color }`; the first step has no `value` (base color). The color of the highest step at or below the value is used. `color` is a CSS color. |
+
+`display: battery` works as for [`grafana.panel`](#battery-display) (see the screenshots there). With `batteryStyle: classic` the thresholds above color the fill.
 
 ```yaml
 connections:
@@ -316,4 +378,17 @@ pages:
             - { color: red }
             - { value: 20, color: orange }
             - { value: 50, color: green }
+      # the same value as a battery icon (0-100, min/max are ignored); with batteryStyle classic the
+      # fill color follows the thresholds, without thresholds it is red up to 15 %, orange up to 30 %, else green
+      - id: battery-icon
+        type: mqtt.value
+        connection: mqtt
+        pos: { x: 6, y: 0, w: 2, h: 2 }
+        settings:
+          topic: victron/dc/soc
+          title: Batterie
+          display: battery
+          batteryStyle: classic
+          batteryValue: inline
+          batteryOrientation: vertical
 ```

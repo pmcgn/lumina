@@ -133,7 +133,7 @@ pages:
       #       - { connection: family-calendar, name: Familie, color: "#f59e0b" }
       #       - holidays
 
-      # Grafana: draws a panel of an existing dashboard natively as chart, stat or gauge. The
+      # Grafana: draws a panel of an existing dashboard natively as chart, stat, gauge or battery. The
       # widget re-runs the panel's queries through Grafana's query API, so every datasource
       # Grafana supports works, and it takes unit, thresholds, min/max and time range from the
       # panel (edit the panel in Grafana, the widget follows). Not supported: dashboard
@@ -142,7 +142,10 @@ pages:
       #   panel: Verbrauchswerte     panel id or title             (panel mode)
       #   datasource: InfluxDB       datasource uid or name        (query mode: instead of the two above)
       #   queries: [ { query: "..." } ]   Grafana query objects as in a panel's "targets"
-      #   display: chart             chart | stat | gauge, default from the panel type
+      #   display: chart             chart | stat | gauge | battery, default from the panel type
+      #   batteryStyle: classic      battery only: classic (solid, colored by charge) | minimal (thin outline, accent color)
+      #   batteryValue: side         battery only: none | inline (in the icon) | side (next to it)
+      #   batteryOrientation: horizontal   battery only: horizontal | vertical; the value is read as 0-100
       #   range: 6h                  e.g. 30m, 6h, 7d; default: the dashboard's range
       #   title / unit / decimals / min / max / legend   overrides
       #   intervalSeconds: 60        refresh interval (minimum 10)
@@ -152,11 +155,12 @@ pages:
       #   pos: { x: 0, y: 0, w: 4, h: 2 }
       #   settings: { dashboard: "PV Uebersicht", panel: Verbrauchswerte, range: 24h }
 
-      # MQTT: shows one numeric value of an MQTT topic as stat, gauge or chart (broker, login and TLS
+      # MQTT: shows one numeric value of an MQTT topic as stat, gauge, chart or battery (broker, login and TLS
       # are set in the connection). The chart/sparkline covers what was received since the start.
       #   topic: victron/dc/soc      no wildcards
       #   valuePath: value           field of a JSON payload, e.g. data.soc; default: a plain number, or "value" of a JSON object
-      #   display: stat              stat | gauge | chart
+      #   display: stat              stat | gauge | chart | battery
+      #   batteryStyle / batteryValue / batteryOrientation   battery only, as for grafana.panel
       #   range: 6h                  time range of the chart/sparkline
       #   title / unit / decimals / min / max   as for grafana.panel
       #   thresholds: [ { color: red }, { value: 20, color: green } ]

@@ -9,9 +9,35 @@ import "github.com/pmcgn/lumina/internal/widget"
 type Display string
 
 const (
-	DisplayChart Display = "chart" // time series, one line per series
-	DisplayStat  Display = "stat"  // one big value with a sparkline
-	DisplayGauge Display = "gauge" // value on a dial between min and max
+	DisplayChart   Display = "chart"   // time series, one line per series
+	DisplayStat    Display = "stat"    // one big value with a sparkline
+	DisplayGauge   Display = "gauge"   // value on a dial between min and max
+	DisplayBattery Display = "battery" // value as a battery icon, 0-100 (min/max are ignored)
+)
+
+// BatteryStyle is the look of the battery icon.
+type BatteryStyle string
+
+const (
+	BatteryStyleClassic BatteryStyle = "classic" // solid icon, red / orange / green by charge (or the thresholds)
+	BatteryStyleMinimal BatteryStyle = "minimal" // thin outline, one accent color
+)
+
+// BatteryValue is where the number of a battery is shown.
+type BatteryValue string
+
+const (
+	BatteryValueNone   BatteryValue = "none"   // icon only
+	BatteryValueInline BatteryValue = "inline" // inside the icon
+	BatteryValueSide   BatteryValue = "side"   // next to the icon
+)
+
+// BatteryOrientation is how the battery icon is laid out.
+type BatteryOrientation string
+
+const (
+	BatteryOrientationHorizontal BatteryOrientation = "horizontal"
+	BatteryOrientationVertical   BatteryOrientation = "vertical"
 )
 
 // Data is the widget's data model.
@@ -61,8 +87,13 @@ type Settings struct {
 	Queries    []map[string]any `json:"queries,omitempty"`    // Grafana query objects, e.g. {refId: A, expr: "up"}
 
 	Title   string  `json:"title,omitempty"`   // heading; default: the panel title
-	Display Display `json:"display,omitempty"` // chart | stat | gauge; default: from the panel type
+	Display Display `json:"display,omitempty"` // chart | stat | gauge | battery; default: from the panel type
 	Range   string  `json:"range,omitempty"`   // time range, e.g. 30m, 6h, 7d; default: the dashboard's range, else 6h
+
+	// Battery display only.
+	BatteryStyle       BatteryStyle       `json:"batteryStyle,omitempty"`       // classic | minimal; default classic
+	BatteryValue       BatteryValue       `json:"batteryValue,omitempty"`       // none | inline | side; default side
+	BatteryOrientation BatteryOrientation `json:"batteryOrientation,omitempty"` // horizontal | vertical; default horizontal
 
 	// Overrides (and the only source in query mode).
 	Unit     string   `json:"unit,omitempty"`

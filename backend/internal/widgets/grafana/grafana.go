@@ -79,9 +79,24 @@ func parseSettings(m map[string]any) (Settings, error) {
 		return s, errors.New("set dashboard and panel (reuse a Grafana panel), or datasource and queries")
 	}
 	switch s.Display {
-	case "", DisplayChart, DisplayStat, DisplayGauge:
+	case "", DisplayChart, DisplayStat, DisplayGauge, DisplayBattery:
 	default:
-		return s, fmt.Errorf("setting %q: %q is invalid (chart, stat, gauge)", "display", s.Display)
+		return s, fmt.Errorf("setting %q: %q is invalid (chart, stat, gauge, battery)", "display", s.Display)
+	}
+	switch s.BatteryStyle {
+	case "", BatteryStyleClassic, BatteryStyleMinimal:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (classic, minimal)", "batteryStyle", s.BatteryStyle)
+	}
+	switch s.BatteryValue {
+	case "", BatteryValueNone, BatteryValueInline, BatteryValueSide:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (none, inline, side)", "batteryValue", s.BatteryValue)
+	}
+	switch s.BatteryOrientation {
+	case "", BatteryOrientationHorizontal, BatteryOrientationVertical:
+	default:
+		return s, fmt.Errorf("setting %q: %q is invalid (horizontal, vertical)", "batteryOrientation", s.BatteryOrientation)
 	}
 	if s.Range != "" && !rangeRe.MatchString(s.Range) {
 		return s, fmt.Errorf("setting %q: %q is invalid (examples: 30m, 6h, 7d)", "range", s.Range)

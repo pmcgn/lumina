@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arcPath, fraction, gaugeRange, hasThresholds, seriesColor, thresholdColor, timeFormat, PALETTE } from './logic';
+import { arcPath, batteryColor, batteryPercent, fraction, gaugeRange, hasThresholds, seriesColor, thresholdColor, timeFormat, PALETTE } from './logic';
 
 describe('thresholdColor', () => {
   const steps = [
@@ -91,5 +91,31 @@ describe('seriesColor', () => {
     expect(seriesColor('#123456', 0)).toBe('#123456');
     expect(seriesColor(undefined, 1)).toBe(PALETTE[1]);
     expect(seriesColor('', PALETTE.length)).toBe(PALETTE[0]);
+  });
+});
+
+describe('battery', () => {
+  it('assumes 0..100 and clamps', () => {
+    expect(batteryPercent(57, 'percent')).toBe(57);
+    expect(batteryPercent(140, undefined)).toBe(100);
+    expect(batteryPercent(-3, undefined)).toBe(0);
+    expect(batteryPercent(NaN, undefined)).toBe(0);
+  });
+
+  it('scales a 0..1 unit', () => {
+    expect(batteryPercent(0.42, 'percentunit')).toBeCloseTo(42);
+  });
+
+  it('colors by level without thresholds', () => {
+    expect(batteryColor(10, undefined)).toBe('var(--danger)');
+    expect(batteryColor(15, undefined)).toBe('var(--danger)');
+    expect(batteryColor(30, undefined)).toBe('var(--warn)');
+    expect(batteryColor(31, undefined)).toBe('var(--ok)');
+  });
+
+  it('prefers the thresholds', () => {
+    const steps = [{ color: '#r' }, { value: 50, color: '#g' }];
+    expect(batteryColor(40, steps)).toBe('#r');
+    expect(batteryColor(60, steps)).toBe('#g');
   });
 });

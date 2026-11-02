@@ -4,7 +4,8 @@
   import { formatParts, formatValue } from '../../lib/units';
   import Sparkline from '../../components/charts/Sparkline.svelte';
   import TimeChart from '../../components/charts/TimeChart.svelte';
-  import { arcPath, fraction, gaugeRange, hasThresholds, last, seriesColor, thresholdColor, timeFormat } from './logic';
+  import BatteryIcon from '../../components/BatteryIcon.svelte';
+  import { arcPath, batteryColor, batteryPercent, fraction, gaugeRange, hasThresholds, last, seriesColor, thresholdColor, timeFormat } from './logic';
   import type { Data, Settings } from './model.gen';
 
   let { data, settings, size }: WidgetProps<Data, Settings> = $props();
@@ -32,6 +33,22 @@
   const track = arcPath(100, 100, R, 0, 1);
   const valueArc = $derived(arcPath(100, 100, R, 0, Math.max(frac, 0.004)));
   const xFormat = $derived(timeFormat(data.to - data.from, locale));
+
+  // battery: 0..100 whatever the panel's min/max say
+  const battStyle = $derived(settings.batteryStyle ?? 'classic');
+  const orientation = $derived(settings.batteryOrientation ?? 'horizontal');
+  const valueMode = $derived(settings.batteryValue ?? 'side');
+  const pct = $derived(batteryPercent(value, data.unit));
+  const battColor = $derived(batteryColor(pct, data.thresholds));
+  const battUnit = $derived(parts.unit || '%');
+  // long side of the icon in px: as big as the card allows, leaving room for the heading, the name and the side value
+  const battLength = $derived.by(() => {
+    const aw = Math.max(0, size.width - 44);
+    const ah = Math.max(0, size.height - (first?.name ? 96 : 72));
+    const byWidth = valueMode === 'side' ? aw * 0.46 : aw * 0.9;
+    const max = orientation === 'vertical' ? Math.min(ah, byWidth / (60 / 104)) : Math.min(byWidth, ah * (104 / 56));
+    return Math.round(Math.min(280, Math.max(56, max)));
+  });
 </script>
 
 <div class="g">
@@ -68,6 +85,25 @@
       {#if first && first.points.length > 1 && !compact}
         <div class="spark"><Sparkline points={first.points} color={hasThresholds(data.thresholds) ? accent : first.color} /></div>
       {/if}
+    </div>
+  {:else if data.display === 'battery'}
+    <div class="battery">
+      <div class="row">
+        <BatteryIcon
+          percent={pct}
+          {orientation}
+          variant={battStyle}
+          color={battColor}
+          length={battLength}
+          text={valueMode === 'inline' ? parts.value + battUnit : undefined}
+        />
+        {#if valueMode === 'side'}
+          <div class="big" style:color={battStyle === 'classic' && hasThresholds(data.thresholds) ? battColor : 'var(--text)'}>
+            <span class="num">{parts.value}</span><span class="unit">{battUnit}</span>
+          </div>
+        {/if}
+      </div>
+      {#if first?.name}<div class="name">{first.name}</div>{/if}
     </div>
   {:else}
     <div class="gauge">
@@ -183,6 +219,26 @@
     flex: 0 0 38%;
     min-height: 0;
     margin-top: var(--space-2);
+  }
+
+  .battery {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+  .battery .big {
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+  }
+  .battery .row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    max-width: 100%;
   }
 
   .gauge {

@@ -47,6 +47,9 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"mqtt.value", m{"topic": "victron/dc/soc", "display": "gauge", "unit": "percent", "min": 0, "max": 100, "valuePath": "value"}, ""},
 		{"mqtt.value", m{"topic": "a/b", "thresholds": []any{m{"color": "red"}, m{"value": 20, "color": "#0a0"}}}, ""},
 
+		{"grafana.panel", m{"dashboard": "PV", "panel": "Batterie", "display": "battery", "batteryStyle": "minimal", "batteryValue": "inline", "batteryOrientation": "vertical"}, ""},
+		{"mqtt.value", m{"topic": "victron/dc/soc", "display": "battery", "batteryValue": "none", "batteryOrientation": "horizontal"}, ""},
+
 		// typos name the valid settings
 		{"core.clock", m{"timezon": "UTC"}, `unknown setting "timezon"`},
 		{"weather.forecast", m{"locaton": "Köln"}, `unknown setting "locaton"`},
@@ -82,6 +85,13 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"mqtt.value", m{"topic": "a/b", "display": "pie"}, `setting "display"`},
 		{"mqtt.value", m{"topic": "a/b", "range": "soon"}, `setting "range"`},
 		{"mqtt.value", m{"topic": "a/b", "thresholds": []any{m{"color": "red;x"}}}, "invalid color"},
+
+		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "display": "battery", "batteryValue": "middle"}, `setting "batteryValue"`},
+		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "display": "battery", "batteryOrientation": "diagonal"}, `setting "batteryOrientation"`},
+		{"mqtt.value", m{"topic": "a/b", "display": "battery", "batteryValue": "middle"}, `setting "batteryValue"`},
+		{"mqtt.value", m{"topic": "a/b", "display": "battery", "batteryStyle": "neon"}, `setting "batteryStyle"`},
+		{"grafana.panel", m{"dashboard": "PV", "panel": 1, "display": "battery", "batteryStyle": "neon"}, `setting "batteryStyle"`},
+		{"mqtt.value", m{"topic": "a/b", "display": "battery", "batteryOrientation": "diagonal"}, `setting "batteryOrientation"`},
 
 		// required values
 		{"mqtt.value", m{}, `"topic" is required`},

@@ -45,6 +45,8 @@
   --icon-cloud-dark: #8794ab;
   --icon-rain: #3b9cf5;
   --icon-snow: #7fb4e8;
+  --icon-battery: #b4c0d4;
+  --icon-battery-empty: #e4e9f2;
 
   /* scrollbars */
   --scrollbar: rgba(20, 30, 50, 0.22);
@@ -67,6 +69,8 @@
     --icon-cloud-dark: #96a2ba;
     --icon-rain: #5db3ff;
     --icon-snow: #cfe6ff;
+    --icon-battery: #96a2ba;
+    --icon-battery-empty: #2a2f3c;
     --scrollbar: rgba(255, 255, 255, 0.2);
     --scrollbar-hover: rgba(255, 255, 255, 0.4);
   }
@@ -87,6 +91,8 @@
   --icon-cloud-dark: #96a2ba;
   --icon-rain: #5db3ff;
   --icon-snow: #cfe6ff;
+  --icon-battery: #96a2ba;
+  --icon-battery-empty: #2a2f3c;
   --scrollbar: rgba(255, 255, 255, 0.2);
   --scrollbar-hover: rgba(255, 255, 255, 0.4);
 }
