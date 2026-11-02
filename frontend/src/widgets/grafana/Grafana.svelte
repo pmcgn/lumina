@@ -64,7 +64,7 @@
       <div class="big" style:color={valueColor}>
         <span class="num">{parts.value}</span>{#if parts.unit}<span class="unit">{parts.unit}</span>{/if}
       </div>
-      {#if first && series.length > 0}<div class="name">{first.name}</div>{/if}
+      {#if first?.name}<div class="name">{first.name}</div>{/if}
       {#if first && first.points.length > 1 && !compact}
         <div class="spark"><Sparkline points={first.points} color={hasThresholds(data.thresholds) ? accent : first.color} /></div>
       {/if}
@@ -78,7 +78,7 @@
         <text x="20" y="116" class="gend" text-anchor="middle">{formatValue(range[0], data.unit, data.decimals, locale)}</text>
         <text x="180" y="116" class="gend" text-anchor="middle">{formatValue(range[1], data.unit, data.decimals, locale)}</text>
       </svg>
-      {#if first}<div class="name">{first.name}</div>{/if}
+      {#if first?.name}<div class="name">{first.name}</div>{/if}
     </div>
   {/if}
 </div>

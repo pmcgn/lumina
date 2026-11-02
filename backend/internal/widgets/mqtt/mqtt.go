@@ -337,7 +337,7 @@ func (p *Provider) data() Data {
 	}
 	d.Thresholds = append(d.Thresholds, p.s.Thresholds...)
 	if len(pts) > 0 {
-		d.Series = []Series{{Name: p.s.Topic, Points: pts}}
+		d.Series = []Series{{Points: pts}}
 	}
 	return d
 }

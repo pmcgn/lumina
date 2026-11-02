@@ -36,7 +36,7 @@ type Threshold struct {
 
 // Series is the received value over time (a stat/gauge shows its last point).
 type Series struct {
-	Name   string  `json:"name"`
+	Name   string  `json:"name"` // empty: the value is not labeled
 	Points []Point `json:"points"`
 }
 
