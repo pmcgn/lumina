@@ -334,6 +334,19 @@ func TestPartialAndTotalQueryFailure(t *testing.T) {
 	}
 }
 
+func TestStreamingOnlyDatasourceIsReportedClearly(t *testing.T) {
+	f, url := newFake(t)
+	f.frames["A"] = []map[string]any{{
+		"schema": map[string]any{"refId": "A", "meta": map[string]any{"channel": "ds/uid/1m0s/victron/dc/soc"}, "fields": []any{}},
+		"data":   map[string]any{"values": []any{}},
+	}}
+	p := start(t, url, map[string]any{"dashboard": "pv-uid", "panel": 1})
+	_, err := p.Fetch(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "only streams live data") || !strings.Contains(err.Error(), "mqtt.value") {
+		t.Errorf("a live-only datasource must be explained, not shown as 'no data': %v", err)
+	}
+}
+
 func TestTableFrameYieldsTheLastValue(t *testing.T) {
 	f, url := newFake(t)
 	f.frames["A"] = []map[string]any{{

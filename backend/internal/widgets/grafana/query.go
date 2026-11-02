@@ -26,6 +26,9 @@ type frame struct {
 	Schema struct {
 		Name   string  `json:"name"`
 		Fields []field `json:"fields"`
+		Meta   struct {
+			Channel string `json:"channel"` // Grafana Live channel of streaming-only datasources
+		} `json:"meta"`
 	} `json:"schema"`
 	Data struct {
 		Values [][]any `json:"values"`
@@ -71,6 +74,10 @@ func (p *Provider) runQueries(ctx context.Context, def *panelDef, from string) (
 			continue
 		}
 		for _, f := range r.Frames {
+			if isStreamingOnly(f) {
+				warnings = append(warnings, fmt.Sprintf("query %s: the datasource only streams live data (Grafana Live) and cannot be queried; use an mqtt.value widget for MQTT topics", ref))
+				continue
+			}
 			series = append(series, framesToSeries(f, p.now())...)
 		}
 	}
@@ -86,6 +93,13 @@ func (p *Provider) runQueries(ctx context.Context, def *panelDef, from string) (
 		return nil, nil, fmt.Errorf("%s", strings.Join(warnings, "; "))
 	}
 	return series, warnings, nil
+}
+
+// isStreamingOnly recognizes the empty frame that live-only datasources (such
+// as Grafana's MQTT datasource) answer a query with: no fields, only the
+// channel the data is streamed to.
+func isStreamingOnly(f frame) bool {
+	return len(f.Schema.Fields) == 0 && f.Schema.Meta.Channel != ""
 }
 
 // buildQueries prepares Grafana query objects: every query gets its datasource,
