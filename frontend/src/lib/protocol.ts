@@ -2,9 +2,9 @@
 // structs (protocol.gen.ts, config.gen.ts; run `go tool tygo generate` in backend/
 // after changing them). This file only gives them the names used in the frontend.
 
-import type { WidgetState as GeneratedWidgetState } from './protocol.gen';
+import type { Alert, WidgetState as GeneratedWidgetState } from './protocol.gen';
 
-export type { ActionResult, Envelope, WidgetStatus } from './protocol.gen';
+export type { ActionResult, Alert, AlertColor, Envelope, WidgetStatus } from './protocol.gen';
 export type {
   ClientConfig,
   DisplayClient as DisplayConfig,
@@ -16,4 +16,9 @@ export type {
 /** Payload of snapshot/update messages; `data` is typed by the widget that receives it. */
 export interface WidgetState<T = unknown> extends Omit<GeneratedWidgetState, 'data'> {
   data?: T;
+}
+
+/** An alert as kept in the browser: `deadline` (local ms) is when it disappears by itself. */
+export interface ActiveAlert extends Alert {
+  deadline: number;
 }

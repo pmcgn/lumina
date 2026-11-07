@@ -1,5 +1,5 @@
 import { SvelteMap } from 'svelte/reactivity';
-import type { ActionResult, ClientConfig, Envelope, WidgetState } from './protocol';
+import type { ActionResult, ActiveAlert, Alert, ClientConfig, Envelope, WidgetState } from './protocol';
 
 export type ConnectionStatus = 'connecting' | 'online' | 'offline';
 
@@ -16,6 +16,8 @@ class Connection {
   status = $state<ConnectionStatus>('connecting');
   config = $state.raw<ClientConfig | null>(null);
   readonly widgets = new SvelteMap<string, WidgetState>();
+  /** Urgent alerts that are active right now, oldest first. */
+  alerts = $state.raw<ActiveAlert[]>([]);
 
   private ws: WebSocket | null = null;
   private attempt = 0;
@@ -40,6 +42,15 @@ class Connection {
 
   /** Sends a widget action; resolves with the result (never rejects). */
   send(widget: string, name: string, params?: unknown): Promise<ActionResult> {
+    return this.request('action', widget, { name, params });
+  }
+
+  /** Confirms an alert; the backend then calls the callback URL it stored for it. */
+  confirmAlert(id: string): Promise<ActionResult> {
+    return this.request('alert_confirm', undefined, { id });
+  }
+
+  private request(type: string, widget: string | undefined, payload: unknown): Promise<ActionResult> {
     return new Promise((resolve) => {
       if (this.status !== 'online') return resolve({ ok: false, error: 'offline' });
       const id = `a${++this.seq}`;
@@ -51,7 +62,7 @@ class Connection {
         window.clearTimeout(timer);
         resolve(r);
       });
-      this.post({ type: 'action', widget, id, payload: { name, params } });
+      this.post({ type, widget, id, payload });
     });
   }
 
@@ -99,6 +110,7 @@ class Connection {
         }
         this.serverVersion = v;
         this.status = 'online';
+        this.alerts = []; // the server re-sends the ones that are still active
         this.syncSubscriptions();
         break;
       }
@@ -108,6 +120,15 @@ class Connection {
       case 'snapshot':
       case 'update':
         if (m.widget) this.widgets.set(m.widget, m.payload as WidgetState);
+        break;
+      case 'alert': {
+        const a = m.payload as Alert;
+        const alert: ActiveAlert = { ...a, deadline: Date.now() + a.remainingMs };
+        this.alerts = [...this.alerts.filter((x) => x.id !== a.id), alert];
+        break;
+      }
+      case 'alert_clear':
+        this.alerts = this.alerts.filter((x) => x.id !== (m.payload as { id: string }).id);
         break;
       case 'action_result': {
         const done = m.id ? this.pending.get(m.id) : undefined;

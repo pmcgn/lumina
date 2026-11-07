@@ -6,7 +6,8 @@
 // Vikunja under /api/v1/ (token "demo", tasks relative to now: complete, undo,
 // add); two iCal feeds under /calendar/ (family.ics, work.ics) with dates
 // relative to now; and Grafana under /api/ (token "demo", dashboard "demo-haus"
-// with generated household curves).
+// with generated household curves). /alert-callback records the confirmations of
+// alerts (docs/alerts.md).
 //
 // Run it with "go run ./mocks/demo-services -addr :18080". Weather has no
 // stand-in: the Open-Meteo API is public and needs no key.
@@ -27,6 +28,7 @@ func main() {
 	newVikunja().register(mux)
 	registerCalendars(mux)
 	registerGrafana(mux)
+	registerAlertCallback(mux)
 
 	log.Printf("demo services on %s (openHAB sitemap Demo, Vikunja token %q, /calendar/family.ics, /calendar/work.ics)", *addr, demoToken)
 	log.Fatal(http.ListenAndServe(*addr, mux))

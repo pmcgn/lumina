@@ -31,6 +31,9 @@ type Hub struct {
 	runners map[string]*runner
 	prints  map[string]string // widget id -> fingerprint of its config
 	clients map[*Client]struct{}
+
+	alertMu sync.Mutex
+	alerts  []*alertEntry // active alerts, oldest first
 }
 
 func NewHub(log *slog.Logger, version string) *Hub {
@@ -57,6 +60,11 @@ func (h *Hub) Ready() bool {
 // Close stops all runners. Connected clients are disconnected by the transport.
 func (h *Hub) Close() {
 	h.cancel()
+	h.alertMu.Lock()
+	for _, a := range h.alerts {
+		a.timer.Stop()
+	}
+	h.alertMu.Unlock()
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, r := range h.runners {
@@ -175,6 +183,7 @@ func (h *Hub) Handle(c *Client, msg Envelope) {
 	case MsgHello:
 		c.Send(encode(MsgWelcome, "", "", WelcomePayload{ServerVersion: h.version, Protocol: ProtocolVersion}))
 		h.sendConfig(c)
+		h.sendAlerts(c)
 	case MsgSubscribe:
 		var p SubscribePayload
 		if err := json.Unmarshal(msg.Payload, &p); err != nil {
@@ -207,6 +216,8 @@ func (h *Hub) Handle(c *Client, msg Envelope) {
 		c.Send(encode(MsgPong, "", msg.ID, nil))
 	case MsgAction:
 		go h.handleAction(c, msg)
+	case MsgAlertConfirm:
+		go h.handleAlertConfirm(c, msg)
 	default:
 		c.Send(encode(MsgError, "", msg.ID, map[string]string{"message": "unknown message type " + msg.Type}))
 	}

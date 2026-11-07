@@ -51,5 +51,10 @@
   "calendar.empty": "No events in the next {days} days",
   "calendar.outdated": "outdated",
   "grafana.noData": "No data in this time range",
-  "grafana.partial": "incomplete"
+  "grafana.partial": "incomplete",
+  "alert.red": "Alarm",
+  "alert.orange": "Warning",
+  "alert.confirm": "Confirm",
+  "alert.more": "+ {n} more",
+  "alert.failed": "Could not confirm. Try again."
 }

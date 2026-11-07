@@ -22,6 +22,8 @@ const (
 	pingInterval = 15 * time.Second
 	writeTimeout = 5 * time.Second
 	readLimit    = 64 << 10
+
+	alertBodyLimit = 8 << 10
 )
 
 type Server struct {
@@ -55,8 +57,44 @@ func (s *Server) Handler() http.Handler {
 		w.Write([]byte("ok"))
 	})
 	mux.HandleFunc("/ws", s.serveWS)
+	mux.HandleFunc("POST /api/alerts", s.triggerAlert)
+	mux.HandleFunc("DELETE /api/alerts/{id}", s.dismissAlert)
 	mux.Handle("/", s.static())
 	return mux
+}
+
+// triggerAlert shows an urgent overlay on all connected dashboards (docs/alerts.md).
+func (s *Server) triggerAlert(w http.ResponseWriter, r *http.Request) {
+	var req core.AlertRequest
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, alertBodyLimit))
+	dec.DisallowUnknownFields() // a typo like "colour" must not silently fall back
+	if err := dec.Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON body: " + err.Error()})
+		return
+	}
+	id, expires, err := s.hub.TriggerAlert(req)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{"id": id, "expiresAt": expires.UTC().Format(time.RFC3339)})
+}
+
+// dismissAlert removes an alert early without calling its callback.
+func (s *Server) dismissAlert(w http.ResponseWriter, r *http.Request) {
+	if err := s.hub.DismissAlert(r.PathValue("id")); err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false) // keep the quotes in error texts readable
+	enc.Encode(v)
 }
 
 func (s *Server) serveWS(w http.ResponseWriter, r *http.Request) {

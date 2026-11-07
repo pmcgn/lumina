@@ -51,5 +51,10 @@
   "calendar.empty": "Keine Termine in den nächsten {days} Tagen",
   "calendar.outdated": "nicht aktuell",
   "grafana.noData": "Keine Daten im Zeitraum",
-  "grafana.partial": "unvollständig"
+  "grafana.partial": "unvollständig",
+  "alert.red": "Alarm",
+  "alert.orange": "Warnung",
+  "alert.confirm": "Bestätigen",
+  "alert.more": "+ {n} weitere",
+  "alert.failed": "Bestätigung fehlgeschlagen. Bitte erneut versuchen."
 }

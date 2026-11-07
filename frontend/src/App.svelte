@@ -5,6 +5,7 @@
   import Dashboard from './components/Dashboard.svelte';
   import ToastHost from './components/ToastHost.svelte';
   import NightMode from './components/NightMode.svelte';
+  import AlertOverlay from './components/AlertOverlay.svelte';
   import { msUntil } from './lib/schedule';
 
   onMount(() => connection.start());
@@ -46,6 +47,8 @@
 {/if}
 
 <ToastHost />
+
+<AlertOverlay />
 
 {#if connection.config && connection.status !== 'online'}
   <div class="banner" role="status">

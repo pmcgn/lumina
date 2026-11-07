@@ -56,6 +56,29 @@ type WidgetState struct {
 	UpdatedAt int64           `json:"updatedAt,omitempty"` // unix ms of the last successful fetch
 }
 
+// AlertColor is the color of an alert overlay; only theme colors are allowed.
+type AlertColor string
+
+const (
+	AlertColorRed    AlertColor = "red"
+	AlertColorOrange AlertColor = "orange"
+)
+
+// Alert is the payload of an alert message: an urgent notice shown over
+// everything. RemainingMs is relative so that the browser's clock does not matter.
+type Alert struct {
+	ID          string     `json:"id"`
+	Text        string     `json:"text"`
+	Color       AlertColor `json:"color"`
+	RemainingMs int64      `json:"remainingMs"`
+	Confirmable bool       `json:"confirmable"` // the overlay offers a confirm button
+}
+
+// AlertRef names an alert: the payload of alert_clear (server) and alert_confirm (client).
+type AlertRef struct {
+	ID string `json:"id"`
+}
+
 func encode(typ, widget, id string, payload any) []byte {
 	var raw json.RawMessage
 	if payload != nil {

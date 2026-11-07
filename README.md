@@ -3,6 +3,7 @@
 A self-hosted, responsive home dashboard for a wall-mounted tablet. A Go backend polls your services and pushes live updates over one WebSocket to a lightweight Svelte frontend. Everything is rendered natively (no iFrames), via widgets.
 
 - Widgets and their configuration: [WIDGETS.md](WIDGETS.md)
+- Urgent alerts via REST (overlay with optional confirm button): [docs/alerts.md](docs/alerts.md)
 - Requirements: [docs/requirements.md](docs/requirements.md)
 - Architecture decisions: [docs/adr/](docs/adr/README.md)
 
@@ -26,7 +27,7 @@ backend/    Go module (cmd/lumina, internal/{config,core,server,widget,widgets/<
 frontend/   Svelte 5 + Vite SPA (src/{lib,components,widgets/<type>,styles,i18n})
 config/     example configuration
 deploy/k8s/ example Kubernetes manifests
-scripts/    demo.ps1 (builds and starts the all-in-one demo)
+scripts/    demo.ps1 (builds and starts the all-in-one demo), send-alert.ps1 (sends a test alert)
 ```
 
 ## Develop
@@ -69,6 +70,20 @@ cd frontend && npm run check
 ## Display behaviour
 
 The optional `display` section of the config controls the always-on screen: page `rotate` (a touch pauses it), a `night` window with `dim` or `clock` mode (a touch wakes the clock), a daily `softReload` (default 03:30) as a safety net for 24/7 operation, and `lite` mode without animations. See [config/config.example.yaml](config/config.example.yaml). Night times use the tablet's own clock. Night mode is software only: it does not control the real screen or its brightness.
+
+## Urgent alerts
+
+`POST /api/alerts` shows a large overlay on every connected dashboard: red or orange, with your text (smaller type for long texts), disappearing after the time you give, and an optional confirm button that makes Lumina call a URL you provide.
+
+![Red alert with confirm button](docs/images/alerts/red-confirm-dark.png)
+
+![Orange alert with a long text](docs/images/alerts/long-text-dark.png)
+
+```powershell
+.\scripts\send-alert.ps1 -Text 'Water leak in the basement!' -Color red -Seconds 60 -Confirm
+```
+
+All fields, behaviour, more screenshots and PowerShell/curl examples: [docs/alerts.md](docs/alerts.md).
 
 ## Demo
 

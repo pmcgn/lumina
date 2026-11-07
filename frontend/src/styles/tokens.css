@@ -29,8 +29,10 @@
   --ok: #22a06b;
   --warn: #e0a100;
   --danger: #e5484d;
+  --orange: #e8710a; /* alert overlay (red = --danger) */
   /* translucent tints for backgrounds (no color-mix: not available before Chrome 111) */
   --danger-soft: rgba(229, 72, 77, 0.16);
+  --orange-soft: rgba(232, 113, 10, 0.2);
   --warn-soft: rgba(224, 161, 0, 0.2);
   --ok-soft: rgba(34, 160, 107, 0.16);
   --accent-soft: rgba(59, 130, 246, 0.16);

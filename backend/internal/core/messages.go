@@ -5,11 +5,12 @@ package core
 
 // Client -> server message types.
 const (
-	MsgHello       = "hello"
-	MsgSubscribe   = "subscribe"
-	MsgUnsubscribe = "unsubscribe"
-	MsgAction      = "action"
-	MsgPing        = "ping"
+	MsgHello        = "hello"
+	MsgSubscribe    = "subscribe"
+	MsgUnsubscribe  = "unsubscribe"
+	MsgAction       = "action"
+	MsgPing         = "ping"
+	MsgAlertConfirm = "alert_confirm"
 )
 
 // Server -> client message types.
@@ -21,4 +22,6 @@ const (
 	MsgActionResult = "action_result"
 	MsgError        = "error"
 	MsgPong         = "pong"
+	MsgAlert        = "alert"
+	MsgAlertClear   = "alert_clear"
 )

@@ -115,6 +115,7 @@ Keywords: **MUST** = required, **SHOULD** = desired, **MAY** = optional / later.
 - FR-20: Multiple simultaneous clients MUST be supported (e.g. tablet + phone), at least ~10 without noticeable load.
 - FR-21: Heartbeats detect dead connections within ~30 s on both sides.
 - FR-22: A relative-time ticker (clocks, "5 min ago") runs in the frontend and does NOT require server traffic.
+- FR-22a: **Urgent alerts:** a REST call (`POST /api/alerts`) is broadcast to all connected clients and shown as a full-screen overlay above everything. Color is `red` or `orange` (theme colors), the text is given by the caller (smaller type when long), the caller gives the time until it disappears, and an optional `callbackUrl` adds a confirm button that makes the backend call that URL. See [alerts.md](alerts.md).
 
 ### 5.4 Data Acquisition in the Backend
 - FR-23: Each widget provider declares how it gets data: **poll** (interval, jitter, backoff on error), **stream/push** (e.g. SSE/WebSocket/webhook from source), or **hybrid**.
