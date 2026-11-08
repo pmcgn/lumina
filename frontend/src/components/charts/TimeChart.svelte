@@ -124,6 +124,7 @@
   bind:clientWidth={width}
   bind:clientHeight={height}
   role="presentation"
+  data-no-swipe
   onpointerdown={press}
   onpointermove={(e) => cursor && inspect(e)}
   onpointerup={release}

@@ -104,6 +104,7 @@
       {width}
       {height}
       role="img"
+      data-no-swipe
       onpointerdown={press}
       onpointermove={(e) => active && inspect(e)}
       onpointerup={release}
