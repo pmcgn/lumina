@@ -2,6 +2,7 @@
   import { scaleLinear, scaleTime } from 'd3-scale';
   import { area, curveMonotoneX, line } from 'd3-shape';
   import { bisector, extent } from 'd3-array';
+  import type { Inspected } from './TimeChart.svelte';
 
   export interface ChartPoint {
     t: number; // unix milliseconds
@@ -15,9 +16,14 @@
     formatX: (t: number) => string;
     formatY: (v: number) => string;
     color?: string;
+    /** Series names for the readout. */
+    name?: string;
+    barName?: string;
+    /** While a finger / the mouse is down: the inspected time and values. The parent shows the readout. */
+    inspected?: Inspected | null;
   }
 
-  let { points, bars = [], formatX, formatY, color = 'var(--accent)' }: Props = $props();
+  let { points, bars = [], formatX, formatY, color = 'var(--accent)', name = '', barName = '', inspected = $bindable(null) }: Props = $props();
 
   const uid = $props.id();
   const m = { top: 22, right: 14, bottom: 24, left: 14 };
@@ -68,10 +74,27 @@
   // Touch/mouse inspection: nearest point under the finger.
   const nearest = bisector<ChartPoint, number>((p) => p.t).center;
   let active = $state<ChartPoint | null>(null);
+  function release() {
+    active = null;
+    inspected = null;
+  }
+  function press(e: PointerEvent) {
+    try {
+      (e.currentTarget as SVGElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* not capturable: moves still arrive while over the chart */
+    }
+    inspect(e);
+  }
   function inspect(e: PointerEvent) {
     const box = (e.currentTarget as SVGElement).getBoundingClientRect();
     const t = x.invert(e.clientX - box.left - m.left).getTime();
     active = points[nearest(points, t)] ?? null;
+    if (!active) return release();
+    const rows = [{ name, color, v: active.v }];
+    const bar = bars.find((b) => b.t === active!.t);
+    if (bar) rows.push({ name: barName, color: 'var(--accent-2)', v: bar.v });
+    inspected = { t: active.t, rows };
   }
 </script>
 
@@ -81,11 +104,11 @@
       {width}
       {height}
       role="img"
-      onpointerdown={inspect}
+      onpointerdown={press}
       onpointermove={(e) => active && inspect(e)}
-      onpointerup={() => (active = null)}
-      onpointercancel={() => (active = null)}
-      onpointerleave={() => (active = null)}
+      onpointerup={release}
+      onpointercancel={release}
+      onlostpointercapture={release}
     >
       <defs>
         <linearGradient id="fill-{uid}" x1="0" y1="0" x2="0" y2="1">
@@ -125,14 +148,8 @@
         {/each}
 
         {#if active}
-          <line class="cursor" x1={x(new Date(active.t))} x2={x(new Date(active.t))} y1="-6" y2={innerH} />
-          <circle cx={x(new Date(active.t))} cy={y(active.v)} r="5" fill={color} stroke="var(--surface)" stroke-width="2" />
-          <text
-            class="tip"
-            x={Math.min(Math.max(x(new Date(active.t)), 44), innerW - 44)}
-            y="-8"
-            text-anchor="middle">{formatX(active.t)} · {formatY(active.v)}</text
-          >
+          <line class="cursor" x1={x(new Date(active.t))} x2={x(new Date(active.t))} y1="0" y2={innerH} />
+          <circle cx={x(new Date(active.t))} cy={y(active.v)} r="4.5" fill={color} stroke="var(--surface)" stroke-width="2" />
         {/if}
       </g>
     </svg>
@@ -144,7 +161,9 @@
     width: 100%;
     height: 100%;
     min-height: 0;
-    touch-action: pan-y;
+    touch-action: none; /* a finger on the chart inspects it instead of scrolling */
+    user-select: none;
+    -webkit-user-select: none;
   }
   svg {
     display: block;
@@ -155,11 +174,6 @@
     font-size: 11px;
   }
   .value {
-    fill: var(--text);
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .tip {
     fill: var(--text);
     font-size: 12px;
     font-weight: 600;

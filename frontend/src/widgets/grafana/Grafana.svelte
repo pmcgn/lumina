@@ -4,7 +4,8 @@
   import { formatParts, formatValue } from '../../lib/units';
   import Sparkline from '../../components/charts/Sparkline.svelte';
   import TimeChart, { type Inspected } from '../../components/charts/TimeChart.svelte';
-  import BatteryIcon from '../../components/BatteryIcon.svelte';
+  import ChartReadout from '../../components/charts/ChartReadout.svelte';
+  import BatteryIcon from'../../components/BatteryIcon.svelte';
   import { arcPath, batteryColor, batteryPercent, fraction, gaugeRange, hasThresholds, last, seriesColor, thresholdColor, timeFormat } from './logic';
   import type { Data, Settings } from './model.gen';
 
@@ -59,13 +60,8 @@
 </script>
 
 <div class="g">
-  {#if data.display === 'chart' && inspected}
-    <div class="readout">
-      <span class="when">{readoutTime(inspected.t)}</span>
-      {#each inspected.rows as r (r.name)}
-        <span class="item"><i style:background={r.color}></i><span class="n">{r.name}</span><b>{fmt(r.v)}</b></span>
-      {/each}
-    </div>
+  {#if inspected}
+    <ChartReadout {inspected} formatT={readoutTime} formatV={fmt} />
   {/if}
   <header>
     <h2>{data.title}</h2>
@@ -98,7 +94,7 @@
       </div>
       {#if first?.name}<div class="name">{first.name}</div>{/if}
       {#if first && first.points.length > 1 && !compact}
-        <div class="spark"><Sparkline points={first.points} color={hasThresholds(data.thresholds) ? accent : first.color} /></div>
+        <div class="spark"><Sparkline points={first.points} name={first.name} color={hasThresholds(data.thresholds) ? accent : first.color} bind:inspected /></div>
       {/if}
     </div>
   {:else if data.display === 'battery'}
@@ -156,46 +152,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .readout {
-    position: absolute;
-    z-index: 1;
-    top: var(--space-2);
-    left: var(--space-3);
-    right: var(--space-3);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-1) var(--space-4);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-s);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    font-size: var(--text-s);
-    pointer-events: none;
-  }
-  .readout .when {
-    color: var(--muted);
-  }
-  .readout .item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-  .readout i {
-    flex: none;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-  }
-  .readout .n {
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 14em;
   }
   .warn {
     flex: none;

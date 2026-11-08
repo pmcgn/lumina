@@ -7,6 +7,8 @@
   "app.noConfig": "Waiting for configuration …",
   "clock.week": "Week {week}",
   "weather.today": "Today",
+  "weather.temperature": "Temperature",
+  "weather.precip": "Rain",
   "weather.feelsLike": "Feels like {temp}",
   "weather.humidity": "Humidity",
   "weather.wind": "Wind",

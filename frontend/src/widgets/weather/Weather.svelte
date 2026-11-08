@@ -2,6 +2,8 @@
   import { i18n } from '../../lib/i18n.svelte';
   import type { WidgetProps } from '../../lib/registry';
   import AreaChart from '../../components/charts/AreaChart.svelte';
+  import ChartReadout from '../../components/charts/ChartReadout.svelte';
+  import type { Inspected } from '../../components/charts/TimeChart.svelte';
   import WeatherIcon from '../../components/WeatherIcon.svelte';
   import type { WeatherData, WeatherSettings } from './types';
 
@@ -23,6 +25,14 @@
   const bars = $derived(data.hourly.map((h) => ({ t: h.t * 1000, v: h.precipProb / 100 })));
   const hourFmt = $derived(new Intl.DateTimeFormat(locale, { hour: '2-digit', hour12: false, timeZone: tz }));
   const hourLabel = (t: number) => hourFmt.format(t); // the German format already includes "Uhr"
+
+  // finger readout, same look as the grafana chart
+  let inspected = $state<Inspected | null>(null);
+  const precipName = $derived(i18n.t('weather.precip'));
+  const readoutFmt = $derived(
+    new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }),
+  );
+  const readoutTime = (t: number) => readoutFmt.format(t);
 
   const cur = $derived(data.current);
   const wind = $derived(`${deg.format(cur.windKmh)} km/h`);
@@ -56,8 +66,11 @@
 
   {#if showChart}
     <div class="chart">
-      <AreaChart {points} {bars} formatX={hourLabel} formatY={temp} />
+      <AreaChart {points} {bars} formatX={hourLabel} formatY={temp} name={i18n.t('weather.temperature')} barName={i18n.t('weather.precip')} bind:inspected />
     </div>
+  {/if}
+  {#if showChart && inspected}
+    <ChartReadout {inspected} formatT={readoutTime} formatV={(v, n) => (n === precipName ? `${Math.round(v * 100)} %` : temp(v))} />
   {/if}
 
   {#if showDaily}
@@ -77,6 +90,7 @@
 
 <style>
   .weather {
+    position: relative;
     height: 100%;
     display: flex;
     flex-direction: column;
