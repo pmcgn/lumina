@@ -48,6 +48,11 @@ packages:
     include_files: ["model.go"]
     enum_style: union
 
+  - path: "github.com/pmcgn/lumina/internal/widgets/tibber"
+    output_path: "../frontend/src/widgets/tibber/model.gen.ts"
+    include_files: ["model.go"]
+    enum_style: union
+
   # Shared protocol (WebSocket envelope, widget state) and the config the browser receives
   - path: "github.com/pmcgn/lumina/internal/core"
     output_path: "../frontend/src/lib/protocol.gen.ts"

@@ -16,9 +16,18 @@ A self-hosted, responsive home dashboard for a wall-mounted tablet. A Go backend
 - M4 (dashboard features): openHAB sliders (dimmers, blinds with up/stop/down, numeric setpoints), page auto-rotation, night mode (dim or clock), nightly soft reload, lite mode. Done.
 - M5 (calendar): `calendar.agenda` merges iCal feeds (Google secret address and others): recurrence, time zones, all-day events, agenda plus month overview. Done.
 - M6 (Grafana and typed settings): `grafana.panel` draws a panel of an existing dashboard as chart, stat or gauge through Grafana's query API (any datasource). All widget settings are now typed Go structs: validated strictly when the config is loaded (a typo is an error that lists the valid settings) and generated to TypeScript. Done.
+- M7 (electricity prices): `tibber.prices` shows the current Tibber price and a chart of the 15-minute prices of today and tomorrow. Done.
 - Next: Paperless-ngx; color pickers and selections for openHAB; a week view for the calendar.
 
-Widgets: `calendar.agenda`, `core.clock`, `grafana.panel`, `openhab.sitemap`, `vikunja.tasks`, `weather.forecast` (a card adapts to its size: compact shows current conditions, taller cards add the 24 h chart and the 7-day forecast).
+Widgets: `calendar.agenda`, `core.clock`, `grafana.panel`, `openhab.sitemap`, `tibber.prices`, `vikunja.tasks`, `weather.forecast` (a card adapts to its size: compact shows current conditions, taller cards add the 24 h chart and the 7-day forecast).
+
+### Tibber electricity prices
+
+`tibber.prices` shows the current price and a chart of all published prices of today and tomorrow. It uses the Tibber Data API, which needs an OAuth client:
+
+1. Create the client at <https://data-api.tibber.com/clients/manage> with the redirect URI `http://localhost:8080/`. The token must have the scope **`data-api-prices-read`** (plus `data-api-homes-read` to find your home); without it the prices request fails with 403.
+2. Log in once to get the refresh token: `TIBBER_CLIENT_ID=... TIBBER_CLIENT_SECRET=... go run ./cmd/tibber-auth` (in `backend/`; it requests these scopes and prints `TIBBER_REFRESH_TOKEN=...`).
+3. Add the `tibber` connection and the widget, see [WIDGETS.md](WIDGETS.md#tibberprices) and [config/config.example.yaml](config/config.example.yaml).
 
 ## Layout
 
@@ -218,9 +227,9 @@ All fields, behaviour, more screenshots and PowerShell/curl examples: [docs/aler
 
 ## Demo
 
-`scripts/demo.ps1` (Windows PowerShell) builds everything and starts a demo with **every integration** (page 1: clock, weather, calendar, Vikunja tasks, openHAB; page 2: Grafana as chart, gauge and stat) using [config/config.demo.yaml](config/config.demo.yaml). It needs no secrets and touches none of your real systems:
+`scripts/demo.ps1` (Windows PowerShell) builds everything and starts a demo with **every integration** (page 1: clock, weather, calendar, Vikunja tasks, openHAB; page 2: Grafana as chart, gauge and stat; Strom page: Tibber prices) using [config/config.demo.yaml](config/config.demo.yaml). It needs no secrets and touches none of your real systems:
 
-- `backend/mocks/demo-services` is a stand-in for openHAB (sitemap `Demo`: lights, dimmer, blinds, heating mode, live values), Vikunja (token `demo`; complete, undo, quick add, a recurring task), Grafana (token `demo`; a dashboard with generated household curves) and two iCal feeds, all with dates relative to now. State lives in memory; restart to reset.
+- `backend/mocks/demo-services` is a stand-in for openHAB (sitemap `Demo`: lights, dimmer, blinds, heating mode, live values), Vikunja (token `demo`; complete, undo, quick add, a recurring task), Grafana (token `demo`; a dashboard with generated household curves), Tibber (generated prices of today and tomorrow) and two iCal feeds, all with dates relative to now. State lives in memory; restart to reset.
 - Weather is live from Open-Meteo, so you need an internet connection. The calendar also includes Google's public holiday calendar.
 
 ```powershell

@@ -59,6 +59,11 @@ connections: {}
   #     # tls: true                  # optional encryption (default port 8883); also implied by ssl:// or mqtts://
   #     # caFile: /certs/ca.pem      # optional: trust this CA instead of the system roots
   #     # insecureSkipVerify: true   # optional: accept any server certificate (self-signed brokers)
+  #   tibber:                      # Tibber electricity prices (OAuth; get the refresh token with: go run ./cmd/tibber-auth)
+  #     clientId: ${TIBBER_CLIENT_ID}
+  #     clientSecret: ${TIBBER_CLIENT_SECRET}
+  #     refreshToken: ${TIBBER_REFRESH_TOKEN}
+  #     # tokenFile: /data/tibber-token.json   # where the rotated refresh token is kept (default: tibber-token.json)
   #   openhab:
   #     url: http://openhab.local:8080
   #     # token: ${OPENHAB_TOKEN}    # only if your openHAB requires an API token
@@ -174,3 +179,10 @@ pages:
       #   connection: mqtt
       #   pos: { x: 4, y: 0, w: 2, h: 2 }
       #   settings: { topic: victron/dc/soc, title: Batterie, display: gauge, unit: percent, min: 0, max: 100 }
+      # Tibber: current electricity price and a bar chart of the 15-minute prices of today and tomorrow.
+      # Needs the `tibber` connection above. `home` (id or name) is only needed with several homes.
+      # - id: strom
+      #   type: tibber.prices
+      #   connection: tibber
+      #   pos: { x: 0, y: 0, w: 4, h: 3 }
+      #   settings: { label: Strompreis }

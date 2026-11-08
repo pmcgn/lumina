@@ -16,6 +16,7 @@ import (
 	_ "github.com/pmcgn/lumina/internal/widgets/grafana"
 	_ "github.com/pmcgn/lumina/internal/widgets/mqtt"
 	_ "github.com/pmcgn/lumina/internal/widgets/openhab"
+	_ "github.com/pmcgn/lumina/internal/widgets/tibber"
 	_ "github.com/pmcgn/lumina/internal/widgets/vikunja"
 	_ "github.com/pmcgn/lumina/internal/widgets/weather"
 )
@@ -35,6 +36,8 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		{"core.clock", nil, ""},
 		{"weather.forecast", m{"location": "Köln"}, ""},
 		{"weather.forecast", m{"latitude": 50.9, "longitude": 6.9, "label": "Zuhause"}, ""},
+		{"tibber.prices", m{"home": "Zuhause", "label": "Strom"}, ""},
+		{"tibber.prices", nil, ""},
 		{"vikunja.tasks", m{"projects": []any{"Smarthome", 5}, "due": "today", "limit": 10, "addProject": "Inbox"}, ""},
 		{"vikunja.tasks", m{"projects": "Inbox", "labels": "home"}, ""},
 		{"openhab.sitemap", m{"sitemap": "Favs", "title": "Favoriten"}, ""},
@@ -53,6 +56,7 @@ func TestEveryWidgetTypeValidatesItsSettings(t *testing.T) {
 		// typos name the valid settings
 		{"core.clock", m{"timezon": "UTC"}, `unknown setting "timezon"`},
 		{"weather.forecast", m{"locaton": "Köln"}, `unknown setting "locaton"`},
+		{"tibber.prices", m{"homes": "x"}, `unknown setting "homes"`},
 		{"vikunja.tasks", m{"dueTo": "today"}, `unknown setting "dueTo"`},
 		{"openhab.sitemap", m{"sitemap": "Favs", "sitemaps": "x"}, `unknown setting "sitemaps"`},
 		{"calendar.agenda", m{"calendars": []any{"family"}, "day": 7}, `unknown setting "day"`},

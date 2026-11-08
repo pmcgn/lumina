@@ -41,6 +41,13 @@ connections:
   grafana:
     url: http://localhost:18080
     token: demo
+  tibber:
+    url: http://localhost:18080/tibber
+    tokenUrl: http://localhost:18080/tibber/connect/token
+    clientId: demo
+    clientSecret: demo
+    refreshToken: demo
+    tokenFile: demo-tibber-token.json
   family-calendar:
     url: http://localhost:18080/calendar/family.ics
   work-calendar:
@@ -130,6 +137,25 @@ pages:
         pos: { x: 5, y: 2, w: 3, h: 2 }
         alwaysOn: true
         settings: { dashboard: demo-haus, panel: 3 }
+
+  # Tibber: current electricity price and the 15-minute prices of today and tomorrow
+  # (here from the demo mock; see WIDGETS.md for the real connection).
+  - id: strom
+    title: Strom
+    widgets:
+      - id: strompreis
+        type: tibber.prices
+        connection: tibber
+        pos: { x: 0, y: 0, w: 5, h: 4 }
+        alwaysOn: true
+        settings:
+          label: Zuhause
+      # the same widget in a small card: only the current price
+      - id: strompreis-klein
+        type: tibber.prices
+        connection: tibber
+        pos: { x: 5, y: 0, w: 3, h: 1 }
+        alwaysOn: true
 
   # Calendar variants: `days` (how far ahead events are listed, default 1 = today only)
   # and `showMonth` (the traditional month grid).

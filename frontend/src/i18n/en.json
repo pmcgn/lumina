@@ -59,5 +59,12 @@
   "alert.orange": "Warning",
   "alert.confirm": "Confirm",
   "alert.more": "+ {n} more",
-  "alert.failed": "Could not confirm. Try again."
+  "alert.failed": "Could not confirm. Try again.",
+  "tibber.price": "Price",
+  "tibber.low": "Low",
+  "tibber.avg": "Average",
+  "tibber.high": "High",
+  "tibber.level.cheap": "Cheap",
+  "tibber.level.normal": "Normal",
+  "tibber.level.expensive": "Expensive"
 }

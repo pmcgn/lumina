@@ -6,7 +6,8 @@
 // Vikunja under /api/v1/ (token "demo", tasks relative to now: complete, undo,
 // add); two iCal feeds under /calendar/ (family.ics, work.ics) with dates
 // relative to now; and Grafana under /api/ (token "demo", dashboard "demo-haus"
-// with generated household curves). /alert-callback records the confirmations of
+// with generated household curves); Tibber under /tibber/ (OAuth token and Data API prices of
+// today and tomorrow). /alert-callback records the confirmations of
 // alerts (docs/alerts.md).
 //
 // Run it with "go run ./mocks/demo-services -addr :18080". Weather has no
@@ -28,6 +29,7 @@ func main() {
 	newVikunja().register(mux)
 	registerCalendars(mux)
 	registerGrafana(mux)
+	registerTibber(mux)
 	registerAlertCallback(mux)
 
 	log.Printf("demo services on %s (openHAB sitemap Demo, Vikunja token %q, /calendar/family.ics, /calendar/work.ics)", *addr, demoToken)

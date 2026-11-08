@@ -14,6 +14,7 @@ Settings are validated strictly when the config is loaded: an unknown or mistype
 | [`vikunja.tasks`](#vikunjatasks) | Open Vikunja tasks, complete with undo, quick add | `vikunja` | yes |
 | [`openhab.sitemap`](#openhabsitemap) | An openHAB sitemap, live, operable | `openhab` | yes |
 | [`grafana.panel`](#grafanapanel) | A Grafana panel as chart, stat, gauge or battery | `grafana` | no |
+| [`tibber.prices`](#tibberprices) | Current electricity price and today / tomorrow price chart (Tibber) | `tibber` | no |
 | [`mqtt.value`](#mqttvalue) | One numeric MQTT value as stat, gauge, chart or battery | `mqtt` | no |
 
 ## Common widget fields
@@ -311,6 +312,59 @@ pages:
           batteryStyle: minimal
           batteryValue: inline
           batteryOrientation: vertical
+```
+
+---
+
+## tibber.prices
+
+Electricity price from [Tibber](https://tibber.com): the current price (with a cheap / normal / expensive tag), the low, average and high of today, and a step chart (same look as the other graphs) of all published 15-minute prices of today and tomorrow (tomorrow appears once Tibber publishes it, around 13:00 CET); the dot marks now. The tag next to the price says whether it is in the cheapest or most expensive third of the shown prices. Touch the chart for the price of a slot. Needs internet access. Prices are shown in ct/kWh (øre for NOK/DKK, öre for SEK), as billed by Tibber (`price` of the Tibber Data API, grid fees only where Tibber includes them, as in Germany).
+
+The widget uses the Tibber Data API with OAuth2. Setup once:
+
+1. Create an OAuth client at <https://data-api.tibber.com/clients/manage> with the redirect URI `http://localhost:8080/`. The token needs the scope **`data-api-prices-read`** (and `data-api-homes-read` to list the homes); `tibber-auth` requests both. Without the prices scope, Tibber answers 403.
+2. Log in once to get a refresh token (opens a URL, needs a browser; stop Lumina first if it uses port 8080):
+   ```sh
+   cd backend
+   TIBBER_CLIENT_ID=... TIBBER_CLIENT_SECRET=... go run ./cmd/tibber-auth
+   ```
+   (PowerShell: set `$env:TIBBER_CLIENT_ID` / `$env:TIBBER_CLIENT_SECRET` first.) It prints `TIBBER_REFRESH_TOKEN=...`.
+3. Provide `TIBBER_CLIENT_ID`, `TIBBER_CLIENT_SECRET` and `TIBBER_REFRESH_TOKEN` to Lumina as environment variables and use them in the connection.
+
+Tibber may rotate the refresh token on every use, so Lumina stores the newest one in `tokenFile` (it survives restarts; the token from the config only seeds the file, and a new token in the config replaces an older file). Keep that file on a persistent volume (Docker: mount a directory and set `tokenFile` into it). Refresh tokens expire after about 30 days without use; if you see `invalid_grant`, run step 2 again. Prices are fetched once per day (and retried hourly while tomorrow is still missing), every widget on the same client shares one token.
+
+Connection `tibber`:
+
+| Option | Required | Default | Description |
+|---|---|---|---|
+| `clientId` | yes | | OAuth client id. |
+| `clientSecret` | yes | | OAuth client secret. |
+| `refreshToken` | yes | | From `tibber-auth`. |
+| `tokenFile` | no | `tibber-token.json` | Where the rotated refresh token is kept. |
+| `url`, `tokenUrl` | no | Tibber | Point at a stand-in service (used by the demo). |
+
+| Setting | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `home` | string | no | first home | Tibber home id or name, if the account has several homes. |
+| `label` | string | no | the home's name | Display name. |
+
+The card adapts to its size: compact shows the current price, taller cards add the low / average / high and the chart.
+
+```yaml
+connections:
+  tibber:
+    clientId: ${TIBBER_CLIENT_ID}
+    clientSecret: ${TIBBER_CLIENT_SECRET}
+    refreshToken: ${TIBBER_REFRESH_TOKEN}
+    # tokenFile: /data/tibber-token.json
+
+# ...
+- id: strom
+  type: tibber.prices
+  connection: tibber
+  pos: { x: 0, y: 0, w: 4, h: 3 }
+  settings:
+    label: Strompreis
 ```
 
 ---

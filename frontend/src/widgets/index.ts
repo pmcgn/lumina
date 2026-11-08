@@ -9,3 +9,4 @@ registerWidget('calendar.agenda', { component: () => import('./calendar/Calendar
 registerWidget('grafana.panel', { component: () => import('./grafana/Grafana.svelte') });
 // Same component as grafana.panel: both send the same data shape (a value or series, unit, thresholds).
 registerWidget('mqtt.value', { component: () => import('./grafana/Grafana.svelte') });
+registerWidget('tibber.prices', { component: () => import('./tibber/Tibber.svelte') });

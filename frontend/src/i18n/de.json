@@ -59,5 +59,12 @@
   "alert.orange": "Warnung",
   "alert.confirm": "Bestätigen",
   "alert.more": "+ {n} weitere",
-  "alert.failed": "Bestätigung fehlgeschlagen. Bitte erneut versuchen."
+  "alert.failed": "Bestätigung fehlgeschlagen. Bitte erneut versuchen.",
+  "tibber.price": "Preis",
+  "tibber.low": "Tief",
+  "tibber.avg": "Ø",
+  "tibber.high": "Hoch",
+  "tibber.level.cheap": "Günstig",
+  "tibber.level.normal": "Normal",
+  "tibber.level.expensive": "Teuer"
 }
