@@ -23,7 +23,7 @@ const Type = "calendar.agenda"
 
 const (
 	maxBody         = 10 << 20
-	defaultDays     = 14
+	defaultDays     = 1
 	maxDays         = 60
 	defaultLimit    = 40
 	defaultInterval = 10 * time.Minute

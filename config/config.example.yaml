@@ -118,7 +118,7 @@ pages:
       # grouped by day (running event highlighted); with enough room also a month overview
       # with colored dots.
       #   calendars: ...         list of connection names, or { connection, name, color }
-      #   days: 14               how far the agenda looks ahead (1-60)
+      #   days: 1                how far ahead events are shown (1-60); an event counts if it starts within this range
       #   limit: 40              max agenda entries
       #   intervalMinutes: 10    refresh interval (feeds are fetched with conditional requests)
       #   weekStart: monday      monday | sunday

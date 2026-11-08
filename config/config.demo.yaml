@@ -1,6 +1,6 @@
 # Lumina demo: every integration, one widget type each.
 # Page 1 is the home screen (clock, weather, calendar, tasks, openHAB); page 2 shows
-# the Grafana widget as chart, gauge and stat.
+# the Grafana widget as chart, gauge and stat; page 3 shows calendar variants.
 #
 # Needs no secrets and touches none of your real systems: openHAB, Vikunja, Grafana
 # and the calendars come from the stand-ins of `demo-services` (see README, "Demo").
@@ -124,3 +124,52 @@ pages:
         pos: { x: 5, y: 2, w: 3, h: 2 }
         alwaysOn: true
         settings: { dashboard: demo-haus, panel: 3 }
+
+  # Calendar variants: `days` (how far ahead events are listed, default 1 = today only)
+  # and `showMonth` (the traditional month grid).
+  - id: calendars
+    title: Kalender
+    widgets:
+      # defaults of days, month grid forced off
+      - id: cal-today
+        type: calendar.agenda
+        pos: { x: 0, y: 0, w: 2, h: 2 }
+        alwaysOn: true
+        settings:
+          title: "Heute (days: 1, ohne Monat)"
+          showMonth: false
+          calendars: &cals
+            - { connection: family-calendar, name: Familie, color: "#f59e0b" }
+            - { connection: work-calendar, name: Arbeit, color: "#3b82f6" }
+            - { connection: holidays, name: Feiertage, color: "#10b981" }
+
+      - id: cal-week
+        type: calendar.agenda
+        pos: { x: 0, y: 2, w: 2, h: 2 }
+        alwaysOn: true
+        settings:
+          title: "7 Tage, ohne Monat"
+          days: 7
+          showMonth: false
+          calendars: *cals
+
+      # month grid + today only
+      - id: cal-month-today
+        type: calendar.agenda
+        pos: { x: 2, y: 0, w: 3, h: 4 }
+        alwaysOn: true
+        settings:
+          title: "Monat + heute"
+          showMonth: true
+          calendars: *cals
+
+      # month grid + the next 14 days
+      - id: cal-month-fortnight
+        type: calendar.agenda
+        pos: { x: 5, y: 0, w: 3, h: 4 }
+        alwaysOn: true
+        settings:
+          title: "Monat + 14 Tage"
+          days: 14
+          showMonth: true
+          calendars: *cals

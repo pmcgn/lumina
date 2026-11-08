@@ -124,7 +124,7 @@
           </ul>
         </div>
       {:else}
-        <div class="empty">{t('calendar.empty', { days: settings.days ?? 14 })}</div>
+        <div class="empty">{(settings.days ?? 1) === 1 ? t('calendar.emptyToday') : t('calendar.empty', { days: settings.days ?? 1 })}</div>
       {/each}
     </section>
   </div>

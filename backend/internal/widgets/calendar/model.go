@@ -38,7 +38,7 @@ type Event struct {
 type Settings struct {
 	Title     string        `json:"title,omitempty"`     // heading; default "Termine"/"Calendar"
 	Calendars []CalendarRef `json:"calendars"`           // the feeds to merge (required)
-	Days      *int          `json:"days,omitempty"`      // how far the agenda looks ahead, 1-60, default 14
+	Days      *int          `json:"days,omitempty"`      // how far the agenda looks ahead, 1-60, default 1
 	Limit     *int          `json:"limit,omitempty"`     // maximum agenda entries, default 40
 	ShowPast  bool          `json:"showPast,omitempty"`  // keep today's finished events
 	ShowMonth *bool         `json:"showMonth,omitempty"` // month overview; default: automatic by card size

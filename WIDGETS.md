@@ -92,12 +92,12 @@ Each calendar is a connection that has either `url` (the iCal address, treat it 
 | `calendars[].name` | string | no | the connection name | Name shown in the legend. |
 | `calendars[].color` | string | no | from a palette | CSS color. |
 | `title` | string | no | `Termine` / `Calendar` | Heading. |
-| `days` | int | no | `14` | How far the agenda looks ahead (1-60). |
+| `days` | int | no | `1` | How many days ahead events are shown (1-60): an event is listed when it starts within this range (today only for `1`); events already running are kept. |
 | `limit` | int | no | `40` | Maximum number of agenda entries. |
 | `intervalMinutes` | int | no | `10` | Refresh interval. |
 | `weekStart` | string | no | `monday` | `monday` or `sunday`. |
 | `showPast` | bool | no | `false` | Keep today's finished events. |
-| `showMonth` | bool | no | automatic by card size | Force the month overview on or off. |
+| `showMonth` | bool | no | automatic by card size | Show the traditional month calendar (all days of the month) with event dots: `true` always, `false` never; unset = only if the card is large enough. |
 
 ```yaml
 connections:

@@ -51,6 +51,7 @@
   "calendar.inMinutes": "in {n} min",
   "calendar.inHours": "in {n} h",
   "calendar.empty": "No events in the next {days} days",
+  "calendar.emptyToday": "No more events today",
   "calendar.outdated": "outdated",
   "grafana.noData": "No data in this time range",
   "grafana.partial": "incomplete",

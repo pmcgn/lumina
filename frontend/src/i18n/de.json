@@ -51,6 +51,7 @@
   "calendar.inMinutes": "in {n} Min",
   "calendar.inHours": "in {n} Std",
   "calendar.empty": "Keine Termine in den nächsten {days} Tagen",
+  "calendar.emptyToday": "Heute keine weiteren Termine",
   "calendar.outdated": "nicht aktuell",
   "grafana.noData": "Keine Daten im Zeitraum",
   "grafana.partial": "unvollständig",

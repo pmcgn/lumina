@@ -102,7 +102,7 @@ func TestMergesCalendars(t *testing.T) {
 	p := startProvider(t, conns, map[string]any{"calendars": []any{
 		map[string]any{"connection": "family", "name": "Familie", "color": "#ff8800"},
 		"work",
-	}})
+	}, "days": 7})
 	d := fetch(t, p)
 
 	if got := titles(d.Events); got != "Geburtstag Oma | Standup | Zahnarzt" {
@@ -143,6 +143,20 @@ func TestAgendaWindowAndLimit(t *testing.T) {
 		if e.Title == "Yesterday" || e.Title == "Beyond window" {
 			t.Errorf("outside the window: %s", e.Title)
 		}
+	}
+}
+
+func TestDefaultRangeIsToday(t *testing.T) {
+	_, u := newFeed(t,
+		timed("a", "Today", "20261017T150000", "20261017T160000"),
+		timed("b", "Tomorrow", "20261018T100000", "20261018T110000"),
+	)
+	conns := map[string]map[string]any{"c": {"url": u}}
+	if d := fetch(t, startProvider(t, conns, map[string]any{"calendars": []any{"c"}})); titles(d.Events) != "Today" {
+		t.Errorf("default range: %s", titles(d.Events))
+	}
+	if d := fetch(t, startProvider(t, conns, map[string]any{"calendars": []any{"c"}, "days": 2})); titles(d.Events) != "Today | Tomorrow" {
+		t.Errorf("days 2: %s", titles(d.Events))
 	}
 }
 
@@ -188,7 +202,7 @@ func TestMonthMarks(t *testing.T) {
 }
 
 func TestConditionalRequestAndCacheFallback(t *testing.T) {
-	f, u := newFeed(t, timed("1", "Termin", "20261019T100000", "20261019T110000"))
+	f, u := newFeed(t, timed("1", "Termin", "20261017T150000", "20261017T160000"))
 	f.etag = `"v1"`
 	p := startProvider(t, map[string]map[string]any{"c": {"url": u}}, map[string]any{"calendars": []any{"c"}})
 
@@ -242,7 +256,7 @@ func TestSecretURLNeverLeaks(t *testing.T) {
 }
 
 func TestOneBrokenCalendarDoesNotHideTheOthers(t *testing.T) {
-	_, good := newFeed(t, timed("1", "Termin", "20261019T100000", "20261019T110000"))
+	_, good := newFeed(t, timed("1", "Termin", "20261017T150000", "20261017T160000"))
 	bad, badURL := newFeed(t)
 	bad.status = http.StatusForbidden
 	p := startProvider(t, map[string]map[string]any{"good": {"url": good}, "bad": {"url": badURL}}, map[string]any{"calendars": []any{"good", "bad"}})
@@ -254,7 +268,7 @@ func TestOneBrokenCalendarDoesNotHideTheOthers(t *testing.T) {
 
 func TestFileSourceAndWebcal(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "home.ics")
-	if err := os.WriteFile(path, cal(timed("1", "Aus Datei", "20261019T100000", "20261019T110000")), 0o600); err != nil {
+	if err := os.WriteFile(path, cal(timed("1", "Aus Datei", "20261017T150000", "20261017T160000")), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	p := startProvider(t, map[string]map[string]any{"f": {"file": path}}, map[string]any{"calendars": []any{"f"}})
