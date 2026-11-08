@@ -27,6 +27,9 @@ grid:
 #   softReload: "03:30"           # daily page reload as a safety net for 24/7 operation
 #                                 # (default 03:30, "" turns it off)
 #   lite: false                   # no animations or shadows, for weak devices
+#   transition:                   # animation between pages (all optional)
+#     type: fade                  # fade (default) | fly | slide | crossfade | scale | blur
+#     durationMs: 300             # 50..2000
 
 server:
   # Extra WebSocket origins; only needed for the Vite dev server:

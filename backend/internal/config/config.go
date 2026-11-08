@@ -42,6 +42,8 @@ type Display struct {
 	SoftReload *string `yaml:"softReload"`
 	// Lite switches off animations and shadows for weak devices.
 	Lite bool `yaml:"lite"`
+	// Transition is the animation between pages (one setting for all pages).
+	Transition PageTransition `yaml:"transition"`
 }
 
 // Night dims the screen (or shows only a clock) between From and To (HH:MM,
@@ -68,6 +70,7 @@ func (d Display) Client() DisplayClient {
 		Night:      NightClient{Enabled: d.Night.From != "", From: d.Night.From, To: d.Night.To, Mode: d.Night.Mode, Dim: d.Night.Dim, WakeSeconds: d.Night.WakeSeconds},
 		SoftReload: soft,
 		Lite:       d.Lite,
+		Transition: d.Transition,
 	}
 }
 
@@ -80,6 +83,14 @@ func (c *Config) validateDisplay(add func(string, ...any)) {
 	}
 	if d.Rotate.PauseSeconds < 0 {
 		add("display.rotate.pauseSeconds: must be >= 0")
+	}
+	switch d.Transition.Type {
+	case TransitionTypeFade, TransitionTypeFly, TransitionTypeSlide, TransitionTypeCrossfade, TransitionTypeScale, TransitionTypeBlur:
+	default:
+		add("display.transition.type: %q invalid (fade, fly, slide, crossfade, scale, blur)", d.Transition.Type)
+	}
+	if d.Transition.DurationMs < 50 || d.Transition.DurationMs > 2000 {
+		add("display.transition.durationMs: %d out of range 50..2000", d.Transition.DurationMs)
 	}
 	n := d.Night
 	if (n.From == "") != (n.To == "") {
@@ -167,6 +178,12 @@ func (c *Config) applyDefaults() {
 	}
 	if c.Display.Rotate.PauseSeconds == 0 {
 		c.Display.Rotate.PauseSeconds = 60
+	}
+	if c.Display.Transition.Type == "" {
+		c.Display.Transition.Type = TransitionTypeFade
+	}
+	if c.Display.Transition.DurationMs == 0 {
+		c.Display.Transition.DurationMs = 300
 	}
 	if c.Display.Night.Mode == "" {
 		c.Display.Night.Mode = "dim"

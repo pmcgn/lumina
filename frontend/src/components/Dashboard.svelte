@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
+  import { cubicOut } from 'svelte/easing';
+  import { blur, fade, fly, scale, slide, type TransitionConfig } from 'svelte/transition';
   import { connection } from '../lib/connection.svelte';
   import type { ClientConfig } from '../lib/protocol';
   import WidgetShell from './WidgetShell.svelte';
@@ -8,6 +9,48 @@
 
   let current = $state(0);
   const page = $derived(config.pages[Math.min(current, config.pages.length - 1)]);
+
+  // Page transition (display.transition); lite mode switches it off.
+  const transition = $derived(config.display.transition);
+  const duration = $derived(config.display.lite ? 0 : transition.durationMs);
+  // 1 = moving to a later page, -1 = to an earlier one (for fly).
+  let direction = 1;
+  let lastIndex = 0;
+  $effect.pre(() => {
+    if (current !== lastIndex) direction = current > lastIndex ? 1 : -1;
+    lastIndex = current;
+  });
+  function pageIn(node: Element): TransitionConfig {
+    switch (transition.type) {
+      case 'fly':
+        return fly(node, { x: `${direction * 100}%`, duration, easing: cubicOut });
+      case 'slide':
+        return slide(node, { axis: 'x', duration, easing: cubicOut });
+      case 'blur':
+        return blur(node, { amount: 12, duration, easing: cubicOut });
+      case 'scale':
+        return scale(node, { start: 0.96, duration, easing: cubicOut });
+      default: // fade, crossfade
+        return fade(node, { duration });
+    }
+  }
+  // 'fade' only fades the new page in; the others also animate the old page out.
+  function pageOut(node: Element): TransitionConfig {
+    switch (transition.type) {
+      case 'fly':
+        return fly(node, { x: `${-direction * 100}%`, duration, easing: cubicOut });
+      case 'slide':
+        return slide(node, { axis: 'x', duration, easing: cubicOut });
+      case 'blur':
+        return blur(node, { amount: 12, duration, easing: cubicOut });
+      case 'scale':
+        return scale(node, { start: 0.96, duration, easing: cubicOut });
+      case 'crossfade':
+        return fade(node, { duration });
+      default:
+        return { duration: 0 };
+    }
+  }
 
   // Only widgets on the visible page receive data.
   $effect(() => {
@@ -66,11 +109,13 @@
 </script>
 
 <div class="dashboard" role="presentation" onpointerdowncapture={interacted}>
+  <div class="stage" class:clip={transition.type === 'fly' || transition.type === 'slide'}>
   {#key page.id}
     <div
       class="grid"
       role="presentation"
-      in:fade={{ duration: config.display.lite ? 0 : 300 }}
+      in:pageIn
+      out:pageOut
       style:grid-template-columns="repeat({config.grid.columns}, minmax(0, 1fr))"
       style:grid-template-rows="repeat({config.grid.rows}, minmax(0, 1fr))"
       ontouchstart={onTouchStart}
@@ -81,6 +126,7 @@
       {/each}
     </div>
   {/key}
+  </div>
 
   {#if config.pages.length > 1}
     <nav class="tabs">
@@ -106,8 +152,17 @@
     padding: var(--space-4);
     gap: var(--space-3);
   }
-  .grid {
+  /* Old and new page overlap in the same cell while they transition. */
+  .stage {
     flex: 1;
+    min-height: 0;
+    display: grid;
+  }
+  .stage.clip {
+    overflow: hidden; /* moving pages must not leave the screen area */
+  }
+  .grid {
+    grid-area: 1 / 1;
     min-height: 0;
     display: grid;
     gap: var(--space-4);

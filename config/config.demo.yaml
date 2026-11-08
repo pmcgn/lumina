@@ -17,6 +17,11 @@
 locale: de
 timezone: Europe/Berlin
 
+display:
+  transition: 
+    type: blur     # fade | fly | slide | crossfade | scale | blur
+    durationMs: 800   
+
 grid:
   columns: 8
   rows: 4

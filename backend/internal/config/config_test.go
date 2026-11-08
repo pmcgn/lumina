@@ -89,6 +89,29 @@ func TestDisplayDefaults(t *testing.T) {
 	if d.SoftReload != "03:30" || d.Lite {
 		t.Errorf("soft reload must default to 03:30, lite off: %+v", d)
 	}
+	if d.Transition.Type != TransitionTypeFade || d.Transition.DurationMs != 300 {
+		t.Errorf("transition defaults: %+v", d.Transition)
+	}
+}
+
+func TestTransitionConfigured(t *testing.T) {
+	for _, typ := range []string{"fade", "fly", "slide", "crossfade", "scale", "blur"} {
+		cfg, err := Parse([]byte("display: { transition: { type: "+typ+", durationMs: 450 } }\n"+minimal), lookup(nil))
+		if err != nil {
+			t.Fatal(typ, err)
+		}
+		if tr := cfg.Display.Client().Transition; string(tr.Type) != typ || tr.DurationMs != 450 {
+			t.Errorf("%s: %+v", typ, tr)
+		}
+	}
+	// only the speed set: the type stays fade
+	cfg, err := Parse([]byte("display: { transition: { durationMs: 600 } }\n"+minimal), lookup(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tr := cfg.Display.Client().Transition; tr.Type != TransitionTypeFade || tr.DurationMs != 600 {
+		t.Errorf("speed only: %+v", tr)
+	}
 }
 
 func TestDisplayConfigured(t *testing.T) {
@@ -126,6 +149,9 @@ func TestDisplayValidation(t *testing.T) {
 		"too dark":        {"display: { night: { dim: 1 } }", "dim"},
 		"bad soft reload": {"display: { softReload: '3am' }", "softReload"},
 		"wake too short":  {"display: { night: { wakeSeconds: 1 } }", "wakeSeconds"},
+		"bad transition":  {"display: { transition: { type: spin } }", "transition.type"},
+		"too fast":        {"display: { transition: { durationMs: 10 } }", "durationMs"},
+		"too slow":        {"display: { transition: { durationMs: 5000 } }", "durationMs"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			_, err := Parse([]byte(c.yaml+"\n"+minimal), lookup(nil))

@@ -78,6 +78,24 @@ type Rotate struct {
 	PauseSeconds    int  `yaml:"pauseSeconds" json:"pauseSeconds"`       // pause after a touch, default 60
 }
 
+// TransitionType is the animation between two pages.
+type TransitionType string
+
+const (
+	TransitionTypeFade      TransitionType = "fade"      // new page fades in (default)
+	TransitionTypeFly       TransitionType = "fly"       // pages fly sideways in the direction of the tab order
+	TransitionTypeSlide     TransitionType = "slide"     // the old page collapses sideways while the new one unfolds
+	TransitionTypeBlur      TransitionType = "blur"      // crossfade with a blur
+	TransitionTypeCrossfade TransitionType = "crossfade" // old page fades out while the new one fades in
+	TransitionTypeScale     TransitionType = "scale"     // crossfade with a slight zoom
+)
+
+// PageTransition configures the page change animation.
+type PageTransition struct {
+	Type       TransitionType `yaml:"type" json:"type"`             // default fade
+	DurationMs int            `yaml:"durationMs" json:"durationMs"` // 50..2000, default 300
+}
+
 // NightMode is how the screen looks during the night window.
 type NightMode string
 
@@ -88,10 +106,11 @@ const (
 
 // DisplayClient is the resolved display behavior sent to the browser.
 type DisplayClient struct {
-	Rotate     Rotate      `json:"rotate"`
-	Night      NightClient `json:"night"`
-	SoftReload string      `json:"softReload"` // HH:MM, "" = off
-	Lite       bool        `json:"lite"`
+	Rotate     Rotate         `json:"rotate"`
+	Night      NightClient    `json:"night"`
+	SoftReload string         `json:"softReload"` // HH:MM, "" = off
+	Lite       bool           `json:"lite"`
+	Transition PageTransition `json:"transition"`
 }
 
 type NightClient struct {

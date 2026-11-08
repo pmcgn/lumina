@@ -69,7 +69,121 @@ cd frontend && npm run check
 
 ## Display behaviour
 
-The optional `display` section of the config controls the always-on screen: page `rotate` (a touch pauses it), a `night` window with `dim` or `clock` mode (a touch wakes the clock), a daily `softReload` (default 03:30) as a safety net for 24/7 operation, and `lite` mode without animations. See [config/config.example.yaml](config/config.example.yaml). Night times use the tablet's own clock. Night mode is software only: it does not control the real screen or its brightness.
+The optional `display` section of the config controls the always-on screen. Everything in it is optional; the defaults are shown below. A complete example is in [config/config.example.yaml](config/config.example.yaml).
+
+```yaml
+display:
+  rotate:
+    enabled: false
+    intervalSeconds: 30
+    pauseSeconds: 60
+  night:
+    from: ""            # no night window unless from and to are set
+    to: ""
+    mode: dim
+    dim: 0.75
+    wakeSeconds: 30
+  softReload: "03:30"
+  lite: false
+  transition:
+    type: fade
+    durationMs: 300
+```
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rotate.enabled` | bool | `false` | Cycle through the pages automatically. Has no effect with fewer than two pages or when a [home page](#home-page) is set. |
+| `rotate.intervalSeconds` | int, at least 5 | `30` | Time spent on each page. |
+| `rotate.pauseSeconds` | int, 0 or more | `60` | A touch pauses the rotation for this long. |
+| `night.from`, `night.to` | time `HH:MM` | not set | Start and end of the night window, in the tablet's own clock. The window may span midnight. Set both or neither. They must differ. |
+| `night.mode` | `dim` \| `clock` | `dim` | `dim` darkens the dashboard. `clock` shows only a clock. |
+| `night.dim` | number, 0 to 0.95 | `0.75` | `dim` mode: how dark the overlay is (0 = not at all). |
+| `night.wakeSeconds` | int, at least 5 | `30` | `clock` mode: a touch shows the dashboard for this long. |
+| `softReload` | time `HH:MM` or `""` | `"03:30"` | Daily page reload as a safety net for 24/7 operation. `""` turns it off. |
+| `lite` | bool | `false` | No animations or shadows, for weak devices. Also switches off the page transition. |
+| `transition.type` | `fade` \| `fly` \| `slide` \| `crossfade` \| `scale` \| `blur` | `fade` | Animation when the page changes, see [Page transition](#page-transition). |
+| `transition.durationMs` | int, 50 to 2000 | `300` | Duration of that animation in milliseconds. |
+
+Night mode is software only: it does not control the real screen or its brightness. Invalid values reject the config at startup with an error naming the setting.
+
+Examples:
+
+```yaml
+# Dim the dashboard every night
+display:
+  night: { from: "23:00", to: "06:00", mode: dim, dim: 0.8 }
+
+# Show only a clock at night; a touch shows the dashboard for 45 seconds
+display:
+  night: { from: "22:30", to: "06:00", mode: clock, wakeSeconds: 45 }
+
+# Rotate through the pages every 20 seconds; a touch pauses it for two minutes
+display:
+  rotate: { enabled: true, intervalSeconds: 20, pauseSeconds: 120 }
+
+# No daily reload, no animations (weak tablet)
+display:
+  softReload: ""
+  lite: true
+```
+
+### Page transition
+
+`display.transition` sets the animation when the page changes (tap, swipe, rotation or the return to the home page). It is one global setting for all pages. Without it, the new page fades in over 300 ms.
+
+| `type` | Effect |
+| --- | --- |
+| `fade` | The old page disappears at once, the new page fades in. This is the default. |
+| `fly` | Pages fly sideways in the direction of the tab order: moving to a later page pushes the old one out to the left, moving back pushes it out to the right. |
+| `slide` | The old page collapses sideways to nothing while the new one unfolds from nothing. The page content is laid out again while it moves, so it can look jumpy; `fly` is smoother. |
+| `crossfade` | The old page fades out while the new one fades in, so the two overlap. |
+| `scale` | Crossfade with a slight zoom: the new page grows from 96% to 100%, the old one shrinks to 96%. |
+| `blur` | Crossfade with a blur: the old page blurs out while the new one comes into focus. Blur can be slow on weak tablets, so test it on the device. |
+
+`durationMs` applies to every type: smaller is faster. With `lite: true` there is no animation at all, whatever is configured. `fly` and `slide` clip the page area while moving, so widget shadows at the screen edge can be cut off during the move.
+
+One example per type, plus the speed on its own:
+
+```yaml
+# Nothing configured: same as type: fade, durationMs: 300
+display: {}
+
+# Only the speed: the type stays fade
+display:
+  transition: { durationMs: 600 }
+
+# fade: the new page fades in, slowly
+display:
+  transition: { type: fade, durationMs: 600 }
+
+# fly: sideways in the direction of the tab order, quick
+display:
+  transition: { type: fly, durationMs: 250 }
+
+# slide: collapse and unfold
+display:
+  transition: { type: slide, durationMs: 400 }
+
+# crossfade: calm overlap
+display:
+  transition: { type: crossfade, durationMs: 500 }
+
+# scale: crossfade with a slight zoom
+display:
+  transition: { type: scale, durationMs: 350 }
+
+# blur: crossfade with a blur
+display:
+  transition: { type: blur, durationMs: 400 }
+
+# Combined with other display settings
+display:
+  transition:
+    type: fly          # fade | fly | slide | crossfade | scale | blur
+    durationMs: 350    # 50..2000
+  rotate: { enabled: false }
+  lite: false
+```
 
 ### Home page
 
