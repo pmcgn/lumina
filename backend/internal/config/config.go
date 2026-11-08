@@ -226,7 +226,14 @@ func (c *Config) validate() error {
 
 	pageIDs := map[string]bool{}
 	widgetIDs := map[string]bool{}
+	homes := 0
 	for _, p := range c.Pages {
+		if p.Home {
+			homes++
+			if homes == 2 {
+				add("pages: only one page can be home")
+			}
+		}
 		if p.ID == "" {
 			add("pages: page without id")
 		} else if pageIDs[p.ID] {

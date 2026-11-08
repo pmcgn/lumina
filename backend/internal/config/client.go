@@ -48,6 +48,7 @@ type Grid struct {
 type Page struct {
 	ID      string   `yaml:"id" json:"id"`
 	Title   string   `yaml:"title" json:"title"`
+	Home    bool     `yaml:"home" json:"home"` // at most one page; the UI returns to it after inactivity
 	Widgets []Widget `yaml:"widgets" json:"widgets"`
 }
 

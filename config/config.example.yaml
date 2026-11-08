@@ -63,6 +63,8 @@ connections: {}
 pages:
   - id: home
     title: Home
+    # home: true                  # optional, on at most one page: shows a house icon and returns
+    #                             # to this page after 30 s without a touch (disables `rotate`)
     widgets:
       - id: clock-main
         type: core.clock

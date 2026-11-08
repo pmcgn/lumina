@@ -71,6 +71,23 @@ cd frontend && npm run check
 
 The optional `display` section of the config controls the always-on screen: page `rotate` (a touch pauses it), a `night` window with `dim` or `clock` mode (a touch wakes the clock), a daily `softReload` (default 03:30) as a safety net for 24/7 operation, and `lite` mode without animations. See [config/config.example.yaml](config/config.example.yaml). Night times use the tablet's own clock. Night mode is software only: it does not control the real screen or its brightness.
 
+### Home page
+
+Mark one page with `home: true` to make it the home page:
+
+```yaml
+pages:
+  - id: home
+    title: Home
+    home: true
+    widgets: [...]
+```
+
+- The home page shows a small house icon next to its title in the page bar.
+- When another page is selected (tap or swipe) and nobody touches the screen for 30 seconds, the dashboard switches back to the home page. Every touch restarts the 30 seconds. The delay is fixed.
+- At most one page can be `home`; the config is rejected otherwise.
+- While a home page is set, automatic page `rotate` is disabled, because the two would fight over the current page.
+
 ## Urgent alerts
 
 `POST /api/alerts` shows a large overlay on every connected dashboard: red or orange, with your text (smaller type for long texts), disappearing after the time you give, and an optional confirm button that makes Lumina call a URL you provide.

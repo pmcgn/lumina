@@ -17,16 +17,29 @@
   // Auto-rotation: cycle through the pages; any touch pauses it for a while.
   const rotate = $derived(config.display.rotate);
   let pausedUntil = 0;
+  let lastInteraction = Date.now();
   function interacted() {
     pausedUntil = Date.now() + rotate.pauseSeconds * 1000;
+    lastInteraction = Date.now();
   }
+
+  // A page flagged as home is returned to after a while without interaction.
+  const HOME_AFTER_MS = 30_000;
+  const homeIndex = $derived(config.pages.findIndex((p) => p.home));
+  $effect(() => {
+    if (homeIndex < 0) return;
+    const timer = window.setInterval(() => {
+      if (current !== homeIndex && Date.now() - lastInteraction >= HOME_AFTER_MS) current = homeIndex;
+    }, 1000);
+    return () => window.clearInterval(timer);
+  });
   function show(i: number) {
     current = i;
     interacted();
   }
   $effect(() => {
     const pages = config.pages.length;
-    if (!rotate.enabled || pages < 2) return;
+    if (!rotate.enabled || pages < 2 || homeIndex >= 0) return;
     const timer = window.setInterval(() => {
       if (Date.now() >= pausedUntil) current = (current + 1) % pages;
     }, rotate.intervalSeconds * 1000);
@@ -72,7 +85,14 @@
   {#if config.pages.length > 1}
     <nav class="tabs">
       {#each config.pages as p, i (p.id)}
-        <button class:active={i === current} onclick={() => show(i)}>{p.title}</button>
+        <button class:active={i === current} onclick={() => show(i)}>
+          {#if p.home}
+            <svg class="home-icon" viewBox="0 0 24 24" aria-label="Home" role="img">
+              <path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z" fill="currentColor" />
+            </svg>
+          {/if}
+          {p.title}
+        </button>
       {/each}
     </nav>
   {/if}
@@ -108,6 +128,12 @@
   }
   .tabs button {
     cursor: pointer;
+  }
+  .home-icon {
+    width: 1em;
+    height: 1em;
+    margin-right: var(--space-1, 4px);
+    vertical-align: -0.12em;
   }
   .tabs button:active {
     transform: scale(0.95);

@@ -47,6 +47,7 @@ connections:
 pages:
   - id: home
     title: Zuhause
+    home: true          # house icon; the UI returns here after 30 s without a touch
     widgets:
       # Core
       - id: clock
