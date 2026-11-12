@@ -58,6 +58,7 @@ func main() {
 	hub := core.NewHub(log, fullVersion)
 	srv := server.New(hub, log, frontend)
 	srv.SetAllowedOrigins(cfg.Server.AllowedOrigins)
+	srv.SetBackgrounds(cfg.Theme.Background.Light, cfg.Theme.Background.Dark)
 	hub.Apply(cfg)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -102,6 +103,7 @@ func watchConfig(ctx context.Context, log *slog.Logger, path string, last []byte
 			continue
 		}
 		srv.SetAllowedOrigins(cfg.Server.AllowedOrigins)
+		srv.SetBackgrounds(cfg.Theme.Background.Light, cfg.Theme.Background.Dark)
 		hub.Apply(cfg)
 	}
 }

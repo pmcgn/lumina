@@ -19,7 +19,10 @@
 
   /* light theme (default) */
   --bg: #eef1f6;
+  --bg-image: var(--bg-image-light, none); /* the picture is set by App.svelte (theme.background) */
   --surface: #ffffff;
+  --surface-rgb: 255, 255, 255; /* for the widget cards: --card-bg applies theme.widgetOpacity */
+  --card-bg: rgba(var(--surface-rgb), var(--widget-opacity, 1));
   --surface-2: #f3f5f9;
   --border: rgba(20, 30, 50, 0.08);
   --text: #141a26;
@@ -58,7 +61,9 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --bg: #0d0f14;
+    --bg-image: var(--bg-image-dark, none);
     --surface: #171a22;
+    --surface-rgb: 23, 26, 34;
     --surface-2: #1e222c;
     --border: rgba(255, 255, 255, 0.07);
     --text: #eef1f7;
@@ -80,7 +85,9 @@
 
 :root[data-theme='dark'] {
   --bg: #0d0f14;
+  --bg-image: var(--bg-image-dark, none);
   --surface: #171a22;
+  --surface-rgb: 23, 26, 34;
   --surface-2: #1e222c;
   --border: rgba(255, 255, 255, 0.07);
   --text: #eef1f7;

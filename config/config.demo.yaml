@@ -17,6 +17,10 @@
 locale: de
 timezone: Europe/Berlin
 
+theme:
+  widgetOpacity: 0.8
+  background: { light: meadow, dark: dusk }   # embedded pictures, see config.example.yaml
+
 display:
   transition: 
     type: blur     # fade | fly | slide | crossfade | scale | blur

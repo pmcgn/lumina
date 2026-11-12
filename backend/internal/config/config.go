@@ -12,6 +12,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/pmcgn/lumina/internal/backgrounds"
 	"github.com/pmcgn/lumina/internal/widget"
 )
 
@@ -254,6 +255,15 @@ func (c *Config) validate() error {
 	case "auto", "light", "dark":
 	default:
 		add("theme.mode: %q invalid (auto, light, dark)", c.Theme.Mode)
+	}
+	if o := c.Theme.WidgetOpacity; o != nil && (*o < 0.1 || *o > 1) {
+		add("theme.widgetOpacity: %v out of range (0.1..1)", *o)
+	}
+	if err := backgrounds.Validate(c.Theme.Background.Light); err != nil {
+		add("theme.background.light: %v", err)
+	}
+	if err := backgrounds.Validate(c.Theme.Background.Dark); err != nil {
+		add("theme.background.dark: %v", err)
 	}
 	c.validateDisplay(add)
 	if c.Grid.Columns < 1 || c.Grid.Rows < 1 {

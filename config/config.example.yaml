@@ -7,6 +7,14 @@ timezone: Europe/Berlin   # used for "today"/"overdue" windows (default: server 
 theme:
   mode: auto          # auto | light | dark
   # accent: "#4f9cff"
+  # Background picture per color scheme (both optional). A value is the name of an embedded
+  # picture (file name without extension) or the path of your own file, e.g. one mounted into
+  # the container (-v ./wallpapers:/wallpapers:ro). Formats: jpg, png, webp, avif, gif, svg.
+  # Embedded light: dawn, mist, meadow   embedded dark: night, aurora, dusk
+  # widgetOpacity: 0.8                 # opacity of the widget cards, 0.1..1 (default 1): the background shows through
+  # background:
+  #   light: dawn                      # name of an embedded picture
+  #   dark: /wallpapers/evening.jpg    # or a file path
 
 grid:
   columns: 6

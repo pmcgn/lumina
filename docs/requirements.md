@@ -100,7 +100,7 @@ Keywords: **MUST** = required, **SHOULD** = desired, **MAY** = optional / later.
 
 ### 5.2 Theming & Design
 - FR-9: One consistent design system: shared tokens (colors, spacing, radius, typography, elevation, motion), shared base components (card, list, stat, chart, icon, button, badge, empty/error/loading state).
-- FR-10: **Light/dark theme** plus automatic switching (by time/sunset or system); configurable accent color.
+- FR-10: **Light/dark theme** plus automatic switching (by time/sunset or system); configurable accent color; optional background picture per color scheme (embedded example pictures by name, or a file path).
 - FR-11: Large, touch-friendly targets (≥ 44 px), readable from a distance (large type for key values), no hover-dependent interactions.
 - FR-12: **Ambient / night mode:** software-only dimming (dark overlay) or clock-only screen on schedule, wake on touch; the tablet's real screen/brightness is not controlled (Q11). SHOULD avoid burn-in (slow pixel shifting).
 - FR-13: Fonts and icons are bundled locally (no external CDN calls – works offline in LAN, privacy).

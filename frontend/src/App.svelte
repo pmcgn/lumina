@@ -21,6 +21,15 @@
     else root.setAttribute('data-theme', cfg.theme.mode);
     if (cfg.theme.accent) root.style.setProperty('--accent', cfg.theme.accent);
     else root.style.removeProperty('--accent');
+    // Background pictures: one per color scheme, picked by the --bg-image token (tokens.css).
+    const bg = cfg.theme.background;
+    for (const [name, url] of [['light', bg.light], ['dark', bg.dark]]) {
+      if (url) root.style.setProperty(`--bg-image-${name}`, `url("${url}")`);
+      else root.style.removeProperty(`--bg-image-${name}`);
+    }
+    if (bg.light || bg.dark) root.setAttribute('data-background', '');
+    else root.removeAttribute('data-background');
+    root.style.setProperty('--widget-opacity', String(cfg.theme.widgetOpacity));
     if (cfg.display.lite) root.setAttribute('data-lite', '');
     else root.removeAttribute('data-lite');
   });

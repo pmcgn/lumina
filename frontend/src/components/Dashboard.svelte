@@ -199,6 +199,11 @@
       color: var(--text);
     }
   }
+  /* Over a background picture the muted tab labels would be hard to read. */
+  :global(:root[data-background]) .tabs button:not(.active) {
+    background: var(--surface-2);
+    color: var(--text);
+  }
   .tabs button.active {
     background: var(--surface);
     color: var(--text);

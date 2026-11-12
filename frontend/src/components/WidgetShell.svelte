@@ -67,7 +67,7 @@
     min-height: 0;
     overflow: hidden;
     border-radius: var(--radius);
-    background: var(--surface);
+    background: var(--card-bg);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
   }

@@ -15,6 +15,7 @@ import (
 
 	"github.com/coder/websocket"
 
+	"github.com/pmcgn/lumina/internal/backgrounds"
 	"github.com/pmcgn/lumina/internal/core"
 )
 
@@ -31,8 +32,9 @@ type Server struct {
 	log *slog.Logger
 	web fs.FS
 
-	mu      sync.RWMutex
-	origins []string
+	mu         sync.RWMutex
+	origins    []string
+	background map[string]string // "light"/"dark" -> configured name or path
 }
 
 func New(hub *core.Hub, log *slog.Logger, web fs.FS) *Server {
@@ -44,6 +46,34 @@ func (s *Server) SetAllowedOrigins(o []string) {
 	s.mu.Lock()
 	s.origins = o
 	s.mu.Unlock()
+}
+
+// SetBackgrounds sets the configured background pictures (embedded name or file path, "" = none).
+func (s *Server) SetBackgrounds(light, dark string) {
+	s.mu.Lock()
+	s.background = map[string]string{"light": light, "dark": dark}
+	s.mu.Unlock()
+}
+
+// serveBackground serves the configured picture of one color scheme. Only the
+// two configured files are reachable, never a path from the request.
+func (s *Server) serveBackground(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	value := s.background[r.PathValue("variant")]
+	s.mu.RUnlock()
+	if value == "" {
+		http.NotFound(w, r)
+		return
+	}
+	pic, err := backgrounds.Load(value)
+	if err != nil {
+		s.log.Warn("background picture not available", "err", err)
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", pic.ContentType)
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable") // the URL carries a version
+	http.ServeContent(w, r, "", pic.ModTime, pic.Reader())
 }
 
 func (s *Server) Handler() http.Handler {
@@ -60,6 +90,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/alerts", s.triggerAlert)
 	mux.HandleFunc("DELETE /api/alerts/{id}", s.dismissAlert)
 	mux.HandleFunc("POST /api/webhooks/vikunja/{connection}", s.vikunjaWebhook)
+	mux.HandleFunc("GET /backgrounds/{variant}", s.serveBackground)
 	mux.Handle("/", s.static())
 	return mux
 }

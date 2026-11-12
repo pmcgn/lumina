@@ -300,3 +300,32 @@ func TestAlertValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestBackgroundEndpoint(t *testing.T) {
+	log := slog.New(slog.NewTextHandler(testWriter{t}, nil))
+	hub := core.NewHub(log, "test")
+	t.Cleanup(hub.Close)
+	srv := server.New(hub, log, fstest.MapFS{"index.html": {Data: []byte("<html>")}})
+	srv.SetBackgrounds("dawn", "")
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
+
+	get := func(p string) *http.Response {
+		t.Helper()
+		resp, err := http.Get(ts.URL + p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		return resp
+	}
+	if r := get("/backgrounds/light"); r.StatusCode != 200 || r.Header.Get("Content-Type") != "image/jpeg" {
+		t.Errorf("light: %d %q", r.StatusCode, r.Header.Get("Content-Type"))
+	}
+	if r := get("/backgrounds/dark"); r.StatusCode != 404 {
+		t.Errorf("unconfigured dark must be 404, got %d", r.StatusCode)
+	}
+	if r := get("/backgrounds/..%2Fsecret"); r.StatusCode != 404 {
+		t.Errorf("unknown variant must be 404, got %d", r.StatusCode)
+	}
+}

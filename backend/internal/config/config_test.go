@@ -3,6 +3,8 @@ package config
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -205,6 +207,52 @@ func TestWebhookAuthValidation(t *testing.T) {
 		}
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: error %v, want %q", c.name, err, c.want)
+		}
+	}
+}
+
+func TestThemeWidgetOpacity(t *testing.T) {
+	pages := "pages: [{id: p, widgets: [{id: a, type: test.stub}]}]\n"
+	cfg, err := Parse([]byte(pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.WidgetOpacity != 1 {
+		t.Fatalf("default must be 1: %v %v", err, cfg.Client().Theme.WidgetOpacity)
+	}
+	cfg, err = Parse([]byte("theme: { widgetOpacity: 0.6 }\n"+pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.WidgetOpacity != 0.6 {
+		t.Fatalf("0.6: %v %v", err, cfg.Client().Theme.WidgetOpacity)
+	}
+	for _, v := range []string{"0", "0.05", "1.5", "-1"} {
+		if _, err := Parse([]byte("theme: { widgetOpacity: "+v+" }\n"+pages), lookup(nil)); err == nil || !strings.Contains(err.Error(), "widgetOpacity") {
+			t.Errorf("%s: want widgetOpacity error, got %v", v, err)
+		}
+	}
+}
+
+func TestThemeBackground(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "wall.png")
+	os.WriteFile(file, []byte("x"), 0o600)
+	pages := "pages: [{id: p, widgets: [{id: a, type: test.stub}]}]\n"
+
+	cfg, err := Parse([]byte("theme: { background: { light: dawn, dark: '"+file+"' } }\n"+pages), lookup(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bg := cfg.Client().Theme.Background
+	if !strings.HasPrefix(bg.Light, "/backgrounds/light?v=") || !strings.HasPrefix(bg.Dark, "/backgrounds/dark?v=") {
+		t.Errorf("client URLs: %+v", bg)
+	}
+	if strings.Contains(bg.Dark, "wall.png") {
+		t.Error("the file path must not reach the browser")
+	}
+
+	cfg, err = Parse([]byte(pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.Background != (BackgroundClient{}) {
+		t.Errorf("no background must stay empty: %v %+v", err, cfg.Client().Theme.Background)
+	}
+
+	for _, raw := range []string{"{ light: nope }", "{ dark: /does/not/exist.png }"} {
+		if _, err := Parse([]byte("theme: { background: "+raw+" }\n"+pages), lookup(nil)); err == nil || !strings.Contains(err.Error(), "theme.background") {
+			t.Errorf("%s: want theme.background error, got %v", raw, err)
 		}
 	}
 }

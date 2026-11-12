@@ -1,5 +1,7 @@
 package config
 
+import "github.com/pmcgn/lumina/internal/backgrounds"
+
 // Wire model: the configuration the browser receives (message "config").
 // This file is converted to TypeScript by tygo (frontend/src/lib/config.gen.ts).
 // Connections and secrets are never part of it. Keep server-only settings in config.go.
@@ -7,7 +9,7 @@ package config
 // ClientConfig is what the browser receives.
 type ClientConfig struct {
 	Locale  Locale        `json:"locale"`
-	Theme   Theme         `json:"theme"`
+	Theme   ClientTheme   `json:"theme"`
 	Grid    Grid          `json:"grid"`
 	Display DisplayClient `json:"display"`
 	Pages   []Page        `json:"pages"`
@@ -15,7 +17,7 @@ type ClientConfig struct {
 
 // Client returns the browser-facing part of the configuration.
 func (c *Config) Client() ClientConfig {
-	return ClientConfig{Locale: c.Locale, Theme: c.Theme, Grid: c.Grid, Display: c.Display.Client(), Pages: c.Pages}
+	return ClientConfig{Locale: c.Locale, Theme: c.Theme.Client(), Grid: c.Grid, Display: c.Display.Client(), Pages: c.Pages}
 }
 
 // Locale is the UI language.
@@ -36,8 +38,63 @@ const (
 )
 
 type Theme struct {
-	Mode   ThemeMode `yaml:"mode" json:"mode"`
-	Accent string    `yaml:"accent" json:"accent"` // CSS color, optional
+	Mode       ThemeMode  `yaml:"mode"`
+	Accent     string     `yaml:"accent"` // CSS color, optional
+	Background Background `yaml:"background"`
+	// WidgetOpacity is the opacity of the widget cards, 0.1..1 (default 1 = opaque).
+	// Below 1 the background picture shows through the cards.
+	WidgetOpacity *float64 `yaml:"widgetOpacity"`
+}
+
+// Background configures the picture behind the widgets, one per color scheme.
+// A value is the name of an embedded picture (file name without extension) or a
+// file path; empty means no picture.
+type Background struct {
+	Light string `yaml:"light"`
+	Dark  string `yaml:"dark"`
+}
+
+// ClientTheme is the theme as the browser receives it.
+type ClientTheme struct {
+	Mode       ThemeMode        `json:"mode"`
+	Accent     string           `json:"accent"`
+	Background BackgroundClient `json:"background"`
+	// WidgetOpacity is the card opacity, 0.1..1.
+	WidgetOpacity float64 `json:"widgetOpacity"`
+}
+
+// BackgroundClient holds the URLs of the background pictures ("" = none). The
+// server serves them under these URLs; the paths in the configuration never reach the browser.
+type BackgroundClient struct {
+	Light string `json:"light"`
+	Dark  string `json:"dark"`
+}
+
+// BackgroundPath is the URL prefix under which the server serves the pictures
+// (BackgroundPath + "light" or "dark").
+const BackgroundPath = "/backgrounds/"
+
+// Client returns the browser-facing theme.
+func (t Theme) Client() ClientTheme {
+	url := func(variant, value string) string {
+		if value == "" {
+			return ""
+		}
+		return BackgroundPath + variant + "?v=" + backgrounds.Version(value)
+	}
+	opacity := 1.0
+	if t.WidgetOpacity != nil {
+		opacity = *t.WidgetOpacity
+	}
+	return ClientTheme{
+		Mode:          t.Mode,
+		Accent:        t.Accent,
+		WidgetOpacity: opacity,
+		Background: BackgroundClient{
+			Light: url("light", t.Background.Light),
+			Dark:  url("dark", t.Background.Dark),
+		},
+	}
 }
 
 type Grid struct {
