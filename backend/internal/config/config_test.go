@@ -185,3 +185,26 @@ func TestSettingsAreValidatedWhenTheConfigIsLoaded(t *testing.T) {
 		t.Fatalf("a bad setting must be reported at load time, naming the widget: %v", err)
 	}
 }
+
+func TestWebhookAuthValidation(t *testing.T) {
+	page := "\npages:\n  - id: home\n    widgets: []\n"
+	cases := []struct{ name, conns, want string }{
+		{"ok", `{ v: { webhookSecret: s, webhookUser: u, webhookPassword: p } }`, ""},
+		{"secret only", `{ v: { webhookSecret: s } }`, ""},
+		{"user without password", `{ v: { webhookUser: u } }`, "set both webhookUser and webhookPassword"},
+		{"empty secret", `{ v: { webhookSecret: "" } }`, "connections.v.webhookSecret: must be a non-empty string"},
+		{"not a string", `{ v: { webhookSecret: 5 } }`, "connections.v.webhookSecret: must be a non-empty string"},
+	}
+	for _, c := range cases {
+		_, err := Parse([]byte("connections: "+c.conns+page), lookup(nil))
+		if c.want == "" {
+			if err != nil {
+				t.Errorf("%s: %v", c.name, err)
+			}
+			continue
+		}
+		if err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: error %v, want %q", c.name, err, c.want)
+		}
+	}
+}

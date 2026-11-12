@@ -42,6 +42,12 @@ connections: {}
   #   vikunja:
   #     url: https://tasks.example.lan
   #     token: ${VIKUNJA_TOKEN}      # API token (Vikunja: Settings > API Tokens), provided as env var
+  #     # Optional webhook receiver: POST /api/webhooks/vikunja/vikunja (the connection name) makes
+  #     # the task widgets refresh within ~1 s instead of waiting for the poll. Both checks are
+  #     # off unless set, and enforced once set (see WIDGETS.md):
+  #     # webhookSecret: ${VIKUNJA_WEBHOOK_SECRET}   # the secret in Vikunja's webhook (X-Vikunja-Signature)
+  #     # webhookUser: lumina                        # HTTP basic auth; put user:password into the webhook URL
+  #     # webhookPassword: ${VIKUNJA_WEBHOOK_PASSWORD}
   #   family-calendar:               # one connection per calendar; the iCal address is a secret
   #     url: https://calendar.google.com/calendar/ical/XXXX/private-YYYY/basic.ics
   #                                  # Google: calendar settings > "Secret address in iCal format".
@@ -98,7 +104,8 @@ pages:
       #   labels: [home]           task must carry all of these labels
       #   due: all                 all | overdue | today | week (today/week include overdue)
       #   filter: "priority >= 3"  extra Vikunja filter expression
-      #   limit: 50                max rows; "intervalSeconds: 60" poll interval
+      #   limit: 50                max rows; "intervalSeconds: 60" poll interval (can be much
+      #                            higher when the connection's webhook receiver is used)
       #   addProject: Inbox        target for "add task" if not exactly one project is set
       #   title / showProject      heading; project name per row (default: if several projects)
       # - id: tasks

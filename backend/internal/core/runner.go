@@ -40,6 +40,7 @@ type runner struct {
 	lastSent time.Time
 	flushing bool
 	refresh  chan struct{}
+	pending  *time.Timer // debounced refresh requested by a webhook
 	startErr error
 	stopped  bool
 }
@@ -98,6 +99,10 @@ func (r *runner) stop() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.stopped = true
+	if r.pending != nil {
+		r.pending.Stop()
+		r.pending = nil
+	}
 	if r.cancel != nil {
 		r.cancel()
 		r.cancel = nil
@@ -110,6 +115,27 @@ func (r *runner) requestRefresh() {
 	case r.refresh <- struct{}{}:
 	default:
 	}
+}
+
+// scheduleRefresh requests a fetch after delay. Calls while one is already
+// scheduled are merged, so a burst of webhook events (Vikunja sends several per
+// edit) causes one fetch. Nothing happens while the loop is not running: it
+// fetches right when it starts anyway.
+func (r *runner) scheduleRefresh(delay time.Duration) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.pending != nil || r.cancel == nil || r.stopped {
+		return
+	}
+	r.pending = time.AfterFunc(delay, func() {
+		r.mu.Lock()
+		r.pending = nil
+		running := r.cancel != nil && !r.stopped
+		r.mu.Unlock()
+		if running {
+			r.requestRefresh()
+		}
+	})
 }
 
 func (r *runner) startLoopLocked() {

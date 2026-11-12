@@ -59,6 +59,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/ws", s.serveWS)
 	mux.HandleFunc("POST /api/alerts", s.triggerAlert)
 	mux.HandleFunc("DELETE /api/alerts/{id}", s.dismissAlert)
+	mux.HandleFunc("POST /api/webhooks/vikunja/{connection}", s.vikunjaWebhook)
 	mux.Handle("/", s.static())
 	return mux
 }

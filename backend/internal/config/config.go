@@ -216,6 +216,28 @@ func (c *Config) applyDefaults() {
 	}
 }
 
+// validateWebhookAuth checks the optional webhook credentials of a connection.
+// A key that is present but empty is an error: it would silently switch the
+// check off (typically an environment variable that is set but empty).
+func (c *Config) validateWebhookAuth(add func(string, ...any)) {
+	for name, conn := range c.Connections {
+		for _, key := range []string{"webhookSecret", "webhookUser", "webhookPassword"} {
+			v, present := conn[key]
+			if !present {
+				continue
+			}
+			if s, ok := v.(string); !ok || s == "" {
+				add("connections.%s.%s: must be a non-empty string", name, key)
+			}
+		}
+		_, hasUser := conn["webhookUser"]
+		_, hasPass := conn["webhookPassword"]
+		if hasUser != hasPass {
+			add("connections.%s: set both webhookUser and webhookPassword (or neither)", name)
+		}
+	}
+}
+
 func (c *Config) validate() error {
 	var errs []string
 	add := func(format string, a ...any) { errs = append(errs, fmt.Sprintf(format, a...)) }
@@ -240,6 +262,8 @@ func (c *Config) validate() error {
 	if len(c.Pages) == 0 {
 		add("pages: at least one page is required")
 	}
+
+	c.validateWebhookAuth(add)
 
 	pageIDs := map[string]bool{}
 	widgetIDs := map[string]bool{}

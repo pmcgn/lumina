@@ -40,5 +40,5 @@ type Settings struct {
 	Due        string            `json:"due,omitempty"`        // all | overdue | today | week (today and week include overdue)
 
 	Limit           *int `json:"limit,omitempty"`           // maximum rows, default 50
-	IntervalSeconds *int `json:"intervalSeconds,omitempty"` // poll interval, default 60, minimum 15
+	IntervalSeconds *int `json:"intervalSeconds,omitempty"` // poll interval, default 60, minimum 15; webhooks (connection webhookSecret/webhookUser/webhookPassword) refresh sooner
 }

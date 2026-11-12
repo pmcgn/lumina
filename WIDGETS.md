@@ -128,7 +128,9 @@ pages:
 
 Open tasks of a [Vikunja](https://vikunja.io) instance, overdue first. Tap the circle to complete a task (with undo); a quick-add field creates tasks. With `readOnly: true` the checkboxes and the add button are hidden.
 
-Connection: `url` (required) and `token` (required, Vikunja: Settings > API Tokens; pass it as `${ENV}`).
+Connection: `url` (required) and `token` (required, Vikunja: Settings > API Tokens; pass it as `${ENV}`). Optional, for the [webhook receiver](#vikunja-webhook-receiver): `webhookSecret`, `webhookUser`, `webhookPassword`.
+
+Updates: Lumina polls Vikunja every `intervalSeconds`. With the webhook receiver enabled in Vikunja, changes show up within about a second instead. The regular poll stays as the safety net, and you can raise `intervalSeconds` to 300 or more when using webhooks.
 
 | Setting | Type | Required | Default | Description |
 |---|---|---|---|---|
@@ -140,7 +142,7 @@ Connection: `url` (required) and `token` (required, Vikunja: Settings > API Toke
 | `title` | string | no | `Aufgaben` / `Tasks` | Heading. |
 | `showProject` | bool | no | when several projects are shown | Show the project name per row. |
 | `limit` | int | no | `50` | Maximum number of rows (at least 1). |
-| `intervalSeconds` | int | no | `60` | Poll interval (minimum 15). |
+| `intervalSeconds` | int | no | `60` | Poll interval (minimum 15). With the webhook receiver in use, 300 or more is enough. |
 
 ```yaml
 connections:
@@ -160,6 +162,41 @@ pages:
         settings:
           projects: [Smarthome]
           due: week
+```
+
+### Vikunja webhook receiver
+
+Lumina accepts webhooks from Vikunja at
+
+```
+POST /api/webhooks/vikunja/<connection name>
+```
+
+Every event (task created, updated, done, deleted, ...) only means "something changed": Lumina then fetches the task list again, for every `vikunja.tasks` widget that uses this connection. The payload itself is deliberately not used. This has these advantages:
+
+- **Fast.** Changes made in Vikunja appear on the tablet after about a second (Lumina waits one second and merges bursts of events, because Vikunja sends several per edit) instead of up to a minute. With the receiver you can raise `intervalSeconds`, which reduces the load on Vikunja.
+- **Consistent.** The list always comes from the same full fetch, with your filters, sorting and `limit` applied. A task can never show up twice, a missed, duplicated or reordered webhook does no harm, and the regular poll remains the safety net if Vikunja or the network drops a delivery (Vikunja does not retry failed deliveries).
+- **Safe by default.** The receiver cannot change anything; at worst someone triggers an extra fetch (at most one per second per widget).
+
+Setup in Vikunja: create a webhook (project: *Webhooks*, or in your user settings), choose the events you care about and set the target URL to `http://<lumina host>:8080/api/webhooks/vikunja/vikunja` (the last part is the name of the connection in `connections`). Vikunja blocks webhook targets in private networks by default; if Lumina runs in your LAN, allow that in Vikunja's `outgoingrequests` settings.
+
+Authentication is optional, but enforced as soon as it is configured. Set it in the connection (never in `settings`); if both are set, both must pass:
+
+| Connection option | Description |
+|---|---|
+| `webhookSecret` | The secret you entered in Vikunja's webhook form. Vikunja then sends `X-Vikunja-Signature`, the hex HMAC-SHA256 of the request body, and Lumina rejects requests without a valid signature (401). |
+| `webhookUser`, `webhookPassword` | HTTP basic auth, both required together. Put the credentials into the target URL in Vikunja: `http://user:password@<lumina host>:8080/api/webhooks/vikunja/vikunja`. |
+
+Options that are present but empty are a configuration error (so an unset environment variable cannot silently switch the check off). Without any of these options every request is accepted, which is fine in a trusted LAN. Rejected requests are logged (connection name and reason, never the credentials).
+
+```yaml
+connections:
+  vikunja:
+    url: https://tasks.example.lan
+    token: ${VIKUNJA_TOKEN}
+    webhookSecret: ${VIKUNJA_WEBHOOK_SECRET}   # optional
+    webhookUser: lumina                        # optional
+    webhookPassword: ${VIKUNJA_WEBHOOK_PASSWORD}
 ```
 
 ---

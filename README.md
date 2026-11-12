@@ -19,7 +19,7 @@ A self-hosted, responsive home dashboard for a wall-mounted tablet. A Go backend
 - M7 (electricity prices): `tibber.prices` shows the current Tibber price and a chart of the 15-minute prices of today and tomorrow. Done.
 - Next: Paperless-ngx; color pickers and selections for openHAB; a week view for the calendar.
 
-Widgets: `calendar.agenda`, `core.clock`, `grafana.panel`, `openhab.sitemap`, `tibber.prices`, `vikunja.tasks`, `weather.forecast` (a card adapts to its size: compact shows current conditions, taller cards add the 24 h chart and the 7-day forecast).
+Widgets: `calendar.agenda`, `core.clock`, `grafana.panel`, `openhab.sitemap`, `tibber.prices`, `vikunja.tasks` (optional webhook receiver for instant updates), `weather.forecast` (a card adapts to its size: compact shows current conditions, taller cards add the 24 h chart and the 7-day forecast).
 
 ### Tibber electricity prices
 
@@ -210,6 +210,10 @@ pages:
 - When another page is selected (tap or swipe) and nobody touches the screen for 30 seconds, the dashboard switches back to the home page. Every touch restarts the 30 seconds. The delay is fixed.
 - At most one page can be `home`; the config is rejected otherwise.
 - While a home page is set, automatic page `rotate` is disabled, because the two would fight over the current page.
+
+## Webhooks (Vikunja)
+
+Lumina receives Vikunja webhooks at `POST /api/webhooks/vikunja/<connection name>`. An event only triggers a fresh fetch of the task list (the payload is not used), so changes show up after about a second and the list can never contain a task twice. Optional HMAC signature (`webhookSecret`) and basic auth (`webhookUser`/`webhookPassword`) are enforced once configured. Details and setup: [WIDGETS.md](WIDGETS.md#vikunja-webhook-receiver).
 
 ## Urgent alerts
 
