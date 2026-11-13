@@ -35,6 +35,25 @@ function Require($name) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) { throw "'$name' is required but was not found in PATH." }
 }
 
+# A demo that is still running from an earlier start would lock the binaries (the build
+# could not overwrite them) and occupy the ports. Stop our own leftovers; a foreign
+# program on a port is never killed.
+function Stop-PreviousDemo {
+  $ours = @('lumina.exe', 'demo-services.exe') | ForEach-Object { Join-Path $bin $_ }
+  $stopped = $false
+  foreach ($proc in Get-Process -ErrorAction SilentlyContinue) {
+    $path = try { $proc.Path } catch { $null }
+    if ($path -and ($ours -contains $path)) {
+      Write-Host "== stopping the demo that is already running ($($proc.ProcessName), pid $($proc.Id))" -ForegroundColor Yellow
+      Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+      $proc.WaitForExit(5000) | Out-Null
+      $stopped = $true
+    }
+  }
+  return $stopped
+}
+Stop-PreviousDemo | Out-Null
+
 if (-not $SkipBuild) {
   Require go
   Require npm
@@ -65,7 +84,9 @@ if (-not $SkipBuild) {
 
 foreach ($p in 18080, $Port) {
   if (Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue) {
-    throw "Port $p is already in use. Stop the other program (or use -Port) and try again."
+    $owner = (Get-NetTCPConnection -LocalPort $p -State Listen | Select-Object -First 1).OwningProcess
+    $name = (Get-Process -Id $owner -ErrorAction SilentlyContinue).ProcessName
+    throw "Port $p is in use by another program ($name, pid $owner), not by this demo. Stop it (or use -Port) and try again."
   }
 }
 
