@@ -242,6 +242,10 @@ func TestThemeStyle(t *testing.T) {
 	if err != nil || cfg.Client().Theme.Style != ThemeStyleHolo {
 		t.Fatalf("holo: %v %v", err, cfg.Client().Theme.Style)
 	}
+	cfg, err = Parse([]byte("theme: { style: holo-dark }\n"+pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.Style != ThemeStyleHoloDark {
+		t.Fatalf("holo-dark: %v %v", err, cfg.Client().Theme.Style)
+	}
 	if _, err := Parse([]byte("theme: { style: shiny }\n"+pages), lookup(nil)); err == nil || !strings.Contains(err.Error(), "theme.style") {
 		t.Errorf("want theme.style error, got %v", err)
 	}

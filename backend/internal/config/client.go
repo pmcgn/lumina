@@ -38,7 +38,7 @@ const (
 )
 
 // ThemeStyle selects the look of the widget cards: flat (default), glass
-// (frosted blur, sheen and edge highlight) or holo (iridescent, holographic).
+// (frosted blur, sheen and edge highlight) holo (iridescent, holographic) or holo-dark (dark blue holographic).
 // Glass and holo are ignored in display.lite.
 type ThemeStyle string
 
@@ -46,6 +46,8 @@ const (
 	ThemeStyleFlat  ThemeStyle = "flat"
 	ThemeStyleGlass ThemeStyle = "glass"
 	ThemeStyleHolo  ThemeStyle = "holo"
+	// ThemeStyleHoloDark is a darker, blue-only holographic look with navy cards.
+	ThemeStyleHoloDark ThemeStyle = "holo-dark"
 )
 
 type Theme struct {
@@ -70,7 +72,7 @@ type Background struct {
 type ClientTheme struct {
 	Mode       ThemeMode        `json:"mode"`
 	Style      ThemeStyle       `json:"style"`
-	Accent    string           `json:"accent"`
+	Accent     string           `json:"accent"`
 	Background BackgroundClient `json:"background"`
 	// WidgetOpacity is the card opacity, 0.1..1.
 	WidgetOpacity float64 `json:"widgetOpacity"`
@@ -102,7 +104,7 @@ func (t Theme) Client() ClientTheme {
 	return ClientTheme{
 		Mode:          t.Mode,
 		Style:         t.Style,
-		Accent:       t.Accent,
+		Accent:        t.Accent,
 		WidgetOpacity: opacity,
 		Background: BackgroundClient{
 			Light: url("light", t.Background.Light),

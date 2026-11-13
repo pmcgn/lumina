@@ -262,12 +262,22 @@ See [config/config.example.yaml](config/config.example.yaml). The file is watche
 
 ### Card style
 
-`theme.style` sets the look of all widget cards on all pages: `flat` (default), `glass` or `holo`. `glass` is a frosted-glass look with background blur, a soft highlight across the top and a bright edge; `holo` is a holographic variant with an iridescent cyan/violet/pink sheen and a neon edge glow. The blur is most visible together with a background picture and `widgetOpacity` below 1. Both are switched off in `display.lite`.
+`theme.style` sets the look of all widget cards on all pages (it applies globally, not per widget or page):
+
+| Value | Look |
+| --- | --- |
+| `flat` (default) | Plain, opaque cards with a thin border and a light shadow. |
+| `glass` | Frosted glass: the background is blurred behind the card, a soft highlight runs across the top and a bright edge catches the light. Follows the light/dark mode. |
+| `holo` | Holographic: an iridescent cyan, violet, pink and gold sheen, a neon edge glow and a violet shadow. Follows the light/dark mode. |
+| `holo-dark` | Calm, dark holographic: near-black navy cards (also in light mode, with light text), a blue-only sheen and a blue edge glow. |
 
 ```yaml
 theme:
-  style: glass                       # flat (default) | glass | holo
+  style: holo-dark                   # flat (default) | glass | holo | holo-dark
+  widgetOpacity: 0.85                # optional: lets the background show through the (blurred) cards
 ```
+
+The blur is most visible with a background picture and a `widgetOpacity` below 1. `glass`, `holo` and `holo-dark` are switched off (flat) when `display.lite` is on. An unknown value is a configuration error.
 
 ### Background picture
 

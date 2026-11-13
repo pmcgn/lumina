@@ -260,9 +260,9 @@ func (c *Config) validate() error {
 		add("theme.mode: %q invalid (auto, light, dark)", c.Theme.Mode)
 	}
 	switch c.Theme.Style {
-	case ThemeStyleFlat, ThemeStyleGlass, ThemeStyleHolo:
+	case ThemeStyleFlat, ThemeStyleGlass, ThemeStyleHolo, ThemeStyleHoloDark:
 	default:
-		add("theme.style: %q invalid (flat, glass, holo)", c.Theme.Style)
+		add("theme.style: %q invalid (flat, glass, holo, holo-dark)", c.Theme.Style)
 	}
 	if o := c.Theme.WidgetOpacity; o != nil && (*o < 0.1 || *o > 1) {
 		add("theme.widgetOpacity: %v out of range (0.1..1)", *o)

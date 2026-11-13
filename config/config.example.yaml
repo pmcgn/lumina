@@ -6,7 +6,12 @@ locale: de            # de | en
 timezone: Europe/Berlin   # used for "today"/"overdue" windows (default: server timezone)
 theme:
   mode: auto          # auto | light | dark
-  # style: flat         # flat (default) | glass (frosted blur, sheen, edge highlight) | holo (iridescent, neon edge); glass/holo are off in display.lite
+  # Look of the widget cards (all pages). All styles except flat are switched off in display.lite.
+  #   flat       plain opaque cards (default)
+  #   glass      frosted glass: background blur, top highlight, bright edge
+  #   holo       holographic: iridescent cyan/violet/pink sheen, neon edge glow
+  #   holo-dark  dark holographic: near-black navy cards, blue-only sheen and glow
+  # style: flat
   # accent: "#4f9cff"
   # Background picture per color scheme (both optional). A value is the name of an embedded
   # picture (file name without extension) or the path of your own file, e.g. one mounted into
