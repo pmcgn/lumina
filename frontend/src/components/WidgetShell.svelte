@@ -69,7 +69,18 @@
     border-radius: var(--radius);
     background: var(--card-bg);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow), var(--glass-edge);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+  /* glossy sheen: light falling on the top of the glass, never blocks touches */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--glass-sheen);
+    pointer-events: none;
   }
   .note {
     height: 100%;

@@ -228,6 +228,25 @@ func TestThemeWidgetOpacity(t *testing.T) {
 	}
 }
 
+func TestThemeStyle(t *testing.T) {
+	pages := "pages: [{id: p, widgets: [{id: a, type: test.stub}]}]\n"
+	cfg, err := Parse([]byte(pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.Style != ThemeStyleFlat {
+		t.Fatalf("default must be flat: %v %v", err, cfg.Client().Theme.Style)
+	}
+	cfg, err = Parse([]byte("theme: { style: glass }\n"+pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.Style != ThemeStyleGlass {
+		t.Fatalf("glass: %v %v", err, cfg.Client().Theme.Style)
+	}
+	cfg, err = Parse([]byte("theme: { style: holo }\n"+pages), lookup(nil))
+	if err != nil || cfg.Client().Theme.Style != ThemeStyleHolo {
+		t.Fatalf("holo: %v %v", err, cfg.Client().Theme.Style)
+	}
+	if _, err := Parse([]byte("theme: { style: shiny }\n"+pages), lookup(nil)); err == nil || !strings.Contains(err.Error(), "theme.style") {
+		t.Errorf("want theme.style error, got %v", err)
+	}
+}
+
 func TestThemeBackground(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "wall.png")
 	os.WriteFile(file, []byte("x"), 0o600)

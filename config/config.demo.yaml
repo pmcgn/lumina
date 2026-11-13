@@ -18,6 +18,7 @@ locale: de
 timezone: Europe/Berlin
 
 theme:
+  style: holo        # flat (default) | glass | holo
   widgetOpacity: 0.8
   background: { light: meadow, dark: dusk }   # embedded pictures, see config.example.yaml
 

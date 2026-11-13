@@ -174,6 +174,9 @@ func (c *Config) applyDefaults() {
 	if c.Theme.Mode == "" {
 		c.Theme.Mode = "auto"
 	}
+	if c.Theme.Style == "" {
+		c.Theme.Style = ThemeStyleFlat
+	}
 	if c.Display.Rotate.IntervalSeconds == 0 {
 		c.Display.Rotate.IntervalSeconds = 30
 	}
@@ -255,6 +258,11 @@ func (c *Config) validate() error {
 	case "auto", "light", "dark":
 	default:
 		add("theme.mode: %q invalid (auto, light, dark)", c.Theme.Mode)
+	}
+	switch c.Theme.Style {
+	case ThemeStyleFlat, ThemeStyleGlass, ThemeStyleHolo:
+	default:
+		add("theme.style: %q invalid (flat, glass, holo)", c.Theme.Style)
 	}
 	if o := c.Theme.WidgetOpacity; o != nil && (*o < 0.1 || *o > 1) {
 		add("theme.widgetOpacity: %v out of range (0.1..1)", *o)

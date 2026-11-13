@@ -30,6 +30,9 @@
     if (bg.light || bg.dark) root.setAttribute('data-background', '');
     else root.removeAttribute('data-background');
     root.style.setProperty('--widget-opacity', String(cfg.theme.widgetOpacity));
+    // Card look (theme.style); lite mode is always flat.
+    if (cfg.theme.style !== 'flat' && !cfg.display.lite) root.setAttribute('data-style', cfg.theme.style);
+    else root.removeAttribute('data-style');
     if (cfg.display.lite) root.setAttribute('data-lite', '');
     else root.removeAttribute('data-lite');
   });

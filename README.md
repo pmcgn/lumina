@@ -260,6 +260,15 @@ Settings are validated strictly when the file is loaded: an unknown or mistyped 
 
 See [config/config.example.yaml](config/config.example.yaml). The file is watched and reloaded automatically (also for ConfigMap mounts). An invalid edit is logged and ignored; the last good configuration stays active. `${VAR}` references are replaced by environment variables before parsing.
 
+### Card style
+
+`theme.style` sets the look of all widget cards on all pages: `flat` (default), `glass` or `holo`. `glass` is a frosted-glass look with background blur, a soft highlight across the top and a bright edge; `holo` is a holographic variant with an iridescent cyan/violet/pink sheen and a neon edge glow. The blur is most visible together with a background picture and `widgetOpacity` below 1. Both are switched off in `display.lite`.
+
+```yaml
+theme:
+  style: glass                       # flat (default) | glass | holo
+```
+
 ### Background picture
 
 `theme.background` sets a picture behind the widgets, one for the light and one for the dark color scheme (each optional; `theme.mode: auto` follows the device):
